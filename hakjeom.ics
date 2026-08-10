@@ -1,0 +1,402 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//학점은행제 컴퓨터공학 로드맵//KO
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:학점은행제 일정
+X-WR-TIMEZONE:Asia/Seoul
+BEGIN:VTIMEZONE
+TZID:Asia/Seoul
+BEGIN:STANDARD
+DTSTART:19700101T000000
+TZOFFSETFROM:+0900
+TZOFFSETTO:+0900
+TZNAME:KST
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:hakjeom-2026-08-10-43a9e6d6bf5b@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:221
+DTSTAMP:20260810T000000Z
+DTSTART;TZID=Asia/Seoul:20260810T090000
+DTEND;TZID=Asia/Seoul:20260810T093000
+SUMMARY:[학점] 실용한문 · 현대인의정신건강 신청 + 반도
+ 체공학Ⅰ 취소
+DESCRIPTION:성신여대 · 각 3학점 · 교양 (현대인의정신건
+ 강은 호환 → 교양 지정)\n선착순 정원제라 개시일에 
+ 바로 넣을 것 · 마감 9/6\n★ 같은 날 반도체공학Ⅰ(일
+ 반선택 3학점)을 취소할 것 — 학기 24학점 자리를 비워
+ 야\n  인공지능(전공)과 효과적인성인교육방법(교양)이
+  들어갑니다. 수강 시작 8/17 전에.
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:실용한문 · 현대인의정신건강 신청 + 반도체
+ 공학Ⅰ 취소
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:1일 뒤 — 실용한문 · 현대인의정신건강 신청 
+ + 반도체공학Ⅰ 취소
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2026-08-17-7ce37824b335@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:221
+DTSTAMP:20260810T000000Z
+DTSTART;TZID=Asia/Seoul:20260817T090000
+DTEND;TZID=Asia/Seoul:20260817T093000
+SUMMARY:[학점] 커피학개론 · 평생교육론 · 인공지능 신
+ 청 시작
+DESCRIPTION:커피학개론 3 (남서울대 · 교양) · 평생교육론
+  3 (남서울대 · 호환 → 교양 지정)\n인공지능 3 (한동대
+  · 컴퓨터공학 전공선택) — 독학사가 한 과목 떨어져
+ 도 전공 62가 되는 보험\n마감: 남서울대 9/6 · 한동대 9/
+ 13
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:커피학개론 · 평생교육론 · 인공지능 신청 시
+ 작
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:1일 뒤 — 커피학개론 · 평생교육론 · 인공지
+ 능 신청 시작
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2026-08-18-75ff5e12de62@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:221
+DTSTAMP:20260810T000000Z
+DTSTART;TZID=Asia/Seoul:20260818T090000
+DTEND;TZID=Asia/Seoul:20260818T093000
+SUMMARY:[학점] 효과적인성인교육방법 신청 시작
+DESCRIPTION:건양사이버대 · 3학점 · 교양 [인간과 사회]\n
+ 이름과 달리 교양입니다 (표준교육과정 원본 대조 완
+ 료) · 마감 9/13
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:효과적인성인교육방법 신청 시작
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:1일 뒤 — 효과적인성인교육방법 신청 시작
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2026-09-06-2e1373f2f6f2@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:221
+DTSTAMP:20260810T000000Z
+DTSTART;TZID=Asia/Seoul:20260906T090000
+DTEND;TZID=Asia/Seoul:20260906T093000
+SUMMARY:[학점] 성신여대 · 남서울대 마감
+DESCRIPTION:실용한문 · 현대인의정신건강 · 커피학개론 
+ · 평생교육론 — 오늘까지
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:성신여대 · 남서울대 마감
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P3D
+DESCRIPTION:3일 뒤 — 성신여대 · 남서울대 마감
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:1일 뒤 — 성신여대 · 남서울대 마감
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2026-09-13-00e27c28e3e2@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:221
+DTSTAMP:20260810T000000Z
+DTSTART;TZID=Asia/Seoul:20260913T090000
+DTEND;TZID=Asia/Seoul:20260913T093000
+SUMMARY:[학점] 한동대 · 건양사이버대 마감
+DESCRIPTION:인공지능 · 효과적인성인교육방법 — 오늘까
+ 지\n이번 학기 목표: 23학점 = 교양 20 + 전공 3
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:한동대 · 건양사이버대 마감
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P3D
+DESCRIPTION:3일 뒤 — 한동대 · 건양사이버대 마감
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:1일 뒤 — 한동대 · 건양사이버대 마감
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2026-09-01-69dfcba71b29@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:221
+DTSTAMP:20260810T000000Z
+DTSTART;TZID=Asia/Seoul:20260901T090000
+DTEND;TZID=Asia/Seoul:20260901T093000
+SUMMARY:[학점] 학점 관리 앱 판 1.4 배포하기
+DESCRIPTION:8월에 Netlify 용량이 차서 못 올렸습니다. 달이 
+ 바뀌었으니 지금 올리세요.\n산출물\\학점관리앱_PWA.zip
+  을 기존 사이트의 Deploys 탭에 끌어다 놓을 것\n(새로 
+ 드롭하면 새 사이트가 생겨 설치된 앱과 끊어집니다)\n
+ 올린 뒤 앱에서 「알림 켜기」를 한 번 누르면 폰 알림
+ 이 켜집니다.\n★ 그전까지 폰 앱의 숫자는 옛 계획(20
+ 학점)입니다 — 실제는 23학점입니다.
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:학점 관리 앱 판 1.4 배포하기
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:1일 뒤 — 학점 관리 앱 판 1.4 배포하기
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2026-11-23-1f5135fb3462@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:221
+DTSTAMP:20260810T000000Z
+DTSTART;TZID=Asia/Seoul:20261123T090000
+DTEND;TZID=Asia/Seoul:20261123T093000
+SUMMARY:[학점] 2026(하) K-MOOC 종강 임박
+DESCRIPTION:11/29 종강 · 미이수 강의가 없는지 확인
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:2026(하) K-MOOC 종강 임박
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2027-01-04-15afcc2b5052@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:221
+DTSTAMP:20260810T000000Z
+DTSTART;TZID=Asia/Seoul:20270104T090000
+DTEND;TZID=Asia/Seoul:20270104T093000
+SUMMARY:[학점] 1월 등록월 — 23학점 인정신청 (날짜 추정)
+DESCRIPTION:★ 호환과목 3개를 반드시 '교양'으로 지정할 
+ 것 (9학점이 걸린 문제)\n  빅데이터개론 · 현대인의정
+ 신건강 · 평생교육론\ncb.or.kr [학점인정 신청]. 등록월
+ 은 1·4·7·10월뿐\n\n※ 아직 공고 전이라 날짜는 추정입
+ 니다. 공고로 확인하고 이 일정을 고치세요.
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:1월 등록월 — 23학점 인정신청
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P7D
+DESCRIPTION:7일 뒤 — 1월 등록월 — 23학점 인정신청
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2027-01-04-143312031f2d@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:221
+DTSTAMP:20260810T000000Z
+DTSTART;TZID=Asia/Seoul:20270104T090000
+DTEND;TZID=Asia/Seoul:20270104T093000
+SUMMARY:[학점] 2027년 일정 공고로 확정하기 (날짜 추정)
+DESCRIPTION:독학사 시행계획 · 기사 시험일정 · 학위신청
+  기간을 공식 공고로 확인\n국가평생교육진흥원 1600-040
+ 0\n이 일정표의 2027년 날짜는 전부 추정이므로 여기서 
+ 바로잡을 것\n\n※ 아직 공고 전이라 날짜는 추정입니
+ 다. 공고로 확인하고 이 일정을 고치세요.
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:2027년 일정 공고로 확정하기
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2027-01-11-46c46eff947d@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:221
+DTSTAMP:20260810T000000Z
+DTSTART;TZID=Asia/Seoul:20270111T090000
+DTEND;TZID=Asia/Seoul:20270111T093000
+SUMMARY:[학점] 정보처리기사 1회 필기 접수 (날짜 추정)
+DESCRIPTION:접수는 회차당 월~목 4일뿐 — 놓치기 쉬움\nq-n
+ et.or.kr 공고로 정확한 날짜 확인\n\n※ 아직 공고 전이
+ 라 날짜는 추정입니다. 공고로 확인하고 이 일정을 고
+ 치세요.
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:정보처리기사 1회 필기 접수
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P3D
+DESCRIPTION:3일 뒤 — 정보처리기사 1회 필기 접수
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2027-02-01-3d4552054ca3@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:221
+DTSTAMP:20260810T000000Z
+DTSTART;TZID=Asia/Seoul:20270201T090000
+DTEND;TZID=Asia/Seoul:20270201T093000
+SUMMARY:[학점] 2027(상) K-MOOC 개설목록 확인 (날짜 추정)
+DESCRIPTION:★ 남은 교양 10학점이 최우선. 그다음은 전공 
+ 강좌를 우선으로 담을 것\n판정은 python 판정.py 로 — 
+ 이름만 보고 짐작하면 틀립니다\n목표 24학점\n\n※ 아
+ 직 공고 전이라 날짜는 추정입니다. 공고로 확인하고 
+ 이 일정을 고치세요.
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:2027(상) K-MOOC 개설목록 확인
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2027-04-01-1a4f34a88705@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:221
+DTSTAMP:20260810T000000Z
+DTSTART;TZID=Asia/Seoul:20270401T090000
+DTEND;TZID=Asia/Seoul:20270401T093000
+SUMMARY:[학점] 독학사 2과정 접수 공고 확인 (날짜 추정)
+DESCRIPTION:★ 연 1회뿐 — 놓치면 학위가 1년 밀림\n접수
+ 는 보통 4월 하순 약 일주일\nbdes.nile.or.kr\n\n※ 아직 공
+ 고 전이라 날짜는 추정입니다. 공고로 확인하고 이 일
+ 정을 고치세요.
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:독학사 2과정 접수 공고 확인
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2027-04-19-f39b832bb24a@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:221
+DTSTAMP:20260810T000000Z
+DTSTART;TZID=Asia/Seoul:20270419T090000
+DTEND;TZID=Asia/Seoul:20270419T093000
+SUMMARY:[학점] 독학사 2과정 2과목 접수 주간 (날짜 추정)
+DESCRIPTION:★ 연 1회 · 이번 주 안에 반드시 접수\n컴퓨터
+ 공학 2과목 = 전공 10학점. 인공지능 3학점을 미리 담아 
+ 뒀으므로\n한 과목이 떨어져도 전공 62로 안전합니다\n
+ 정확한 날짜는 4월 초 공고로 확인해 이 일정을 고칠 
+ 것\n\n※ 아직 공고 전이라 날짜는 추정입니다. 공고로 
+ 확인하고 이 일정을 고치세요.
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:독학사 2과정 2과목 접수 주간
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P3D
+DESCRIPTION:3일 뒤 — 독학사 2과정 2과목 접수 주간
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:1일 뒤 — 독학사 2과정 2과목 접수 주간
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2027-07-01-256332c9cf65@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:221
+DTSTAMP:20260810T000000Z
+DTSTART;TZID=Asia/Seoul:20270701T090000
+DTEND;TZID=Asia/Seoul:20270701T093000
+SUMMARY:[학점] 7월 등록월 — 68학점 일괄 인정신청 (날짜 
+ 추정)
+DESCRIPTION:정보처리기사 20 + 네트워크관리사 2급 14 + 독
+ 학사 10 = 44학점\n2027(상) K-MOOC 24학점도 같은 달에 신청 
+ → 누적 133학점\n이 달에 전공 60과 교양 30이 둘 다 채
+ 워집니다\n\n※ 아직 공고 전이라 날짜는 추정입니다. 
+ 공고로 확인하고 이 일정을 고치세요.
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:7월 등록월 — 68학점 일괄 인정신청
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P7D
+DESCRIPTION:7일 뒤 — 7월 등록월 — 68학점 일괄 인정신청
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2027-08-02-2624a66c301b@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:221
+DTSTAMP:20260810T000000Z
+DTSTART;TZID=Asia/Seoul:20270802T090000
+DTEND;TZID=Asia/Seoul:20270802T093000
+SUMMARY:[학점] 2027(하) K-MOOC 7학점 신청 (날짜 추정)
+DESCRIPTION:마지막 학기 · 잔여 7학점만 가볍게\n\n※ 아직
+  공고 전이라 날짜는 추정입니다. 공고로 확인하고 이 
+ 일정을 고치세요.
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:2027(하) K-MOOC 7학점 신청
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2027-12-01-a0fe41215aa3@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:221
+DTSTAMP:20260810T000000Z
+DTSTART;TZID=Asia/Seoul:20271201T090000
+DTEND;TZID=Asia/Seoul:20271201T093000
+SUMMARY:[학점] 전기 학위신청 기간 확인 (날짜 추정)
+DESCRIPTION:12월~1월 · 최종 인정신청과 함께 진행\n\n※ 아
+ 직 공고 전이라 날짜는 추정입니다. 공고로 확인하고 
+ 이 일정을 고치세요.
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:전기 학위신청 기간 확인
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2028-01-04-7485b2934ca9@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:221
+DTSTAMP:20260810T000000Z
+DTSTART;TZID=Asia/Seoul:20280104T090000
+DTEND;TZID=Asia/Seoul:20280104T093000
+SUMMARY:[학점] 최종 인정신청 + 학위신청 마무리 (날짜 추
+ 정)
+DESCRIPTION:140학점 완성 → 2028년 2월 공학사(컴퓨터공학) 
+ 학위 수여\n\n※ 아직 공고 전이라 날짜는 추정입니다. 
+ 공고로 확인하고 이 일정을 고치세요.
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:최종 인정신청 + 학위신청 마무리
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P7D
+DESCRIPTION:7일 뒤 — 최종 인정신청 + 학위신청 마무리
+END:VALARM
+END:VEVENT
+END:VCALENDAR

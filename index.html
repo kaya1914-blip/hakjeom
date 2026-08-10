@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f3460" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0c0f16" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<title>학점 관리</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+<style>
+:root{
+  color-scheme:dark light;
+  --bg:#0c0f16; --surface:#151a24; --surface2:#1d2431; --bar:#0f1420;
+  --ink:#e7ebf4; --ink2:#adb9ce; --ink3:#7f8ca4;
+  --rule:#262d3c; --navy:#93b7ea; --crimson:#ff8098;
+  --gold:#efc366; --gold-bg:#2b2413; --green:#66d3a6;
+  --done:#7fabe2; --doing:#3d63a0; --todo:#242b39;
+  --nav-h:62px;
+  --font:"Pretendard Variable",Pretendard,"Samsung Sans","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  --num:ui-monospace,"SF Mono","Roboto Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme:light){:root{
+  --bg:#f3f5f9; --surface:#fff; --surface2:#e9eef6; --bar:#fff;
+  --ink:#111726; --ink2:#3f4d66; --ink3:#6a7890;
+  --rule:#dbe1ec; --navy:#0f3460; --crimson:#bc1738;
+  --gold:#8a5b00; --gold-bg:#fdf4dc; --green:#0d6b49;
+  --done:#0f3460; --doing:#2f6db5; --todo:#d9e0ea;
+}}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.55;
+     word-break:keep-all;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+#app *{margin:0}
+
+/* ── 앱바 ── */
+.bar{position:sticky;top:0;z-index:20;background:var(--bar);border-bottom:1px solid var(--rule);
+     padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;display:flex;align-items:center;gap:10px}
+.bar .ttl{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.bar .sub{font-size:11px;color:var(--ink3);margin-top:1px!important}
+.bar .sp{flex:1}
+.pill{font:600 12px/1 var(--font);padding:9px 13px;border-radius:999px;border:1px solid var(--rule);
+      background:var(--surface);color:var(--ink);cursor:pointer}
+.pill.go{background:var(--navy);color:var(--bg);border-color:transparent}
+/* hidden 속성이 항상 이기게 둡니다.
+   .offline 에 display:flex 를 주는 바람에 브라우저 기본 [hidden]{display:none} 이 밀려서
+   온라인인데도 '오프라인' 배지가 계속 떠 있었습니다(작성자 CSS 가 UA 기본을 항상 이깁니다).
+   개별 선택자로 한 곳씩 막다 보면 또 빠뜨립니다 — 전역으로 한 번에 못박습니다. */
+[hidden]{display:none!important}
+.net{font-size:11px;display:flex;align-items:center;gap:5px;color:var(--green)}
+.net .nd{width:7px;height:7px;border-radius:50%;background:var(--green);flex:none}
+.net.off{color:var(--gold)}
+.net.off .nd{background:var(--gold)}
+
+/* ── 본문 ── */
+main{padding:14px 14px calc(var(--nav-h) + env(safe-area-inset-bottom) + 18px);
+     max-width:600px;margin:0 auto}
+.view{display:none}
+.view.on{display:block;animation:in .18s ease}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:16px;padding:16px}
+.card + .card,.card + .reqs,.reqs + .card,h2 + .card,h2 + .list,h2 + .sch{margin-top:10px}
+
+.hero{display:flex;align-items:baseline;gap:9px}
+.hero .n{font-family:var(--num);font-size:46px;font-weight:700;letter-spacing:-.05em;line-height:1}
+.hero .of{font-size:15px;color:var(--ink3);font-family:var(--num)}
+.hero .tag{margin-left:auto;font-size:11.5px;font-weight:700;color:var(--ink3)}
+.bar2{display:flex;height:13px;border-radius:7px;overflow:hidden;background:var(--todo);margin-top:14px}
+.bar2 i{display:block;transition:flex-grow .4s cubic-bezier(.2,.8,.2,1)}
+.bar2 .d{background:var(--done)}.bar2 .g{background:var(--doing)}
+.keys{display:flex;flex-wrap:wrap;gap:6px 15px;margin-top:11px!important;font-size:12px;color:var(--ink2)}
+.keys span{display:flex;align-items:center;gap:6px}
+.keys b{font-family:var(--num);color:var(--ink)}
+.dot{width:9px;height:9px;border-radius:3px;flex:none}
+
+.reqs{display:grid;gap:8px}
+.req{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:13px 15px}
+.req .h{display:flex;align-items:baseline;gap:8px;font-size:13.5px;color:var(--ink2)}
+.req .h b{margin-left:auto;font-family:var(--num);font-size:16px;color:var(--ink)}
+/* 게이지는 3층입니다 — 확보(인정완료) / 신청하면 / 계획대로 가면.
+   확보만 보여주면 신청해도 화면이 안 움직여서 진행이 안 보입니다. */
+.req .track{height:9px;border-radius:5px;background:var(--todo);margin-top:9px;overflow:hidden;display:flex}
+.req .track i{display:block;height:100%;background:var(--done);transition:flex-grow .4s cubic-bezier(.2,.8,.2,1)}
+.req .track i.g{background:var(--doing)}
+.req .track i.p{background:var(--rule)}
+.req .now{font-size:11.5px;color:var(--ink2);margin-top:7px!important}
+.req .now b{font-family:var(--num);color:var(--ink)}
+.fore{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.fore th{font-size:11px;font-weight:700;color:var(--ink3);text-align:right;padding:0 0 7px;letter-spacing:.04em}
+.fore th:first-child{text-align:left}
+.fore td{font-size:13px;padding:9px 0;border-top:1px solid var(--rule);text-align:right}
+.fore td:first-child{text-align:left;color:var(--ink2)}
+.fore td b{font-family:var(--num);font-size:15px}
+.fore tr.fin td{border-top:2px solid var(--ink);font-weight:700}
+.fore .plus{font-family:var(--num);color:var(--doing);font-size:12px}
+.req.met .track i:first-child{background:var(--green)}
+.req.short{border-color:var(--crimson)}
+.req.short .track i:first-child{background:var(--crimson)}
+.req .note{font-size:11.5px;color:var(--ink3);margin-top:7px!important}
+
+h2{font-size:12px;font-weight:700;letter-spacing:.07em;color:var(--ink3);margin:20px 2px 8px!important}
+
+.next{background:var(--gold-bg);border:1px solid var(--gold);border-radius:16px;padding:16px}
+.next .d{font-size:14px;font-weight:700;color:var(--crimson)}
+.next .t{font-size:17px;font-weight:700;margin-top:3px!important}
+.next .b{font-size:13px;color:var(--ink2);margin-top:7px!important;white-space:pre-line}
+
+.chips{display:flex;gap:7px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.fchip{flex:none;font:600 13px/1 var(--font);padding:9px 15px;border-radius:999px;cursor:pointer;
+       border:1px solid var(--rule);background:var(--surface);color:var(--ink2)}
+.fchip[aria-pressed="true"]{background:var(--navy);color:var(--bg);border-color:transparent}
+
+.list,.sch{background:var(--surface);border:1px solid var(--rule);border-radius:16px;overflow:hidden}
+.item{display:flex;align-items:center;gap:13px;width:100%;text-align:left;min-height:64px;
+      padding:13px 15px;background:none;border:0;border-bottom:1px solid var(--rule);
+      cursor:pointer;font:inherit;color:inherit}
+.item:last-child{border-bottom:0}
+.item:active{background:var(--surface2)}
+.item[hidden]{display:none}
+/* 기본(예정) 라벨은 작은 굵은 글자라 대비가 4.5 이상이어야 합니다.
+   --ink3 을 쓰니 라이트 모드에서 3.4 로 떨어졌습니다(검수에서 잡음). --ink2 로 올렸습니다. */
+.mark{flex:none;min-width:62px;text-align:center;padding:6px 9px;border-radius:8px;
+      font-size:11.5px;font-weight:700;line-height:1.2;
+      color:var(--ink2);background:var(--todo);transition:background .2s,color .2s}
+.item[data-s="인정완료"] .mark{background:var(--done);color:var(--bg)}
+/* 파란 배경에 배경색 글씨를 얹었더니 대비가 2.6까지 떨어졌습니다(검수에서 잡음).
+   흰 글씨로 바꾸고 라이트 모드의 --doing 을 진하게 내렸습니다. */
+.item[data-s="신청완료"] .mark{background:var(--doing);color:#fff}
+.item[data-s="취소예정"] .mark{background:var(--crimson);color:var(--bg)}
+.item[data-s="취소완료"] .mark{background:var(--rule);color:var(--ink3)}
+.item[data-s="취소완료"] .nm .n1,.item[data-s="취소완료"] .cr{text-decoration:line-through;color:var(--ink3)}
+.cancel{font-size:10px;font-weight:700;color:var(--crimson);border:1px solid var(--crimson);
+        border-radius:999px;padding:2px 7px}
+.nm{flex:1;min-width:0}
+.nm .n1{font-size:15px;font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.nm .n2{font-size:11.5px;color:var(--ink3);margin-top:2px!important}
+.item[data-s="인정완료"] .nm .n1{color:var(--ink2)}
+.cr{font-family:var(--num);font-weight:700;font-size:17px;flex:none}
+.chip{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;border:1px solid currentColor}
+.c-전공{color:var(--navy)}.c-교양{color:var(--crimson)}.c-일반{color:var(--ink3)}
+.hoh{font-size:10px;font-weight:700;color:var(--gold);border:1px solid var(--gold);
+     border-radius:999px;padding:2px 7px}
+
+.srow{width:100%;text-align:left;display:flex;gap:12px;padding:14px 15px;font:inherit;color:inherit;
+      background:none;border:0;border-bottom:1px solid var(--rule);cursor:pointer}
+.srow:last-child{border-bottom:0}
+.srow:active{background:var(--surface2)}
+.srow .dd{font-weight:700;width:66px;flex:none;color:var(--ink3);font-size:13px;line-height:1.35}
+.srow.soon .dd{color:var(--crimson)}
+.srow.past{opacity:.45}
+.srow .st{flex:1;min-width:0;font-size:14px}
+.srow .guess{font-size:10.5px;color:var(--ink3);display:block;margin-top:2px}
+.srow .body{font-size:12.5px;color:var(--ink2);white-space:pre-line;margin-top:8px;display:none}
+.srow[aria-expanded="true"] .body{display:block}
+
+.calbig{width:100%;font:700 15px/1 var(--font);color:var(--bg);background:var(--navy);
+        border:0;border-radius:14px;padding:16px;cursor:pointer;margin-bottom:10px}
+.subs{background:var(--surface);border:1px solid var(--rule);border-radius:16px;padding:16px;margin-bottom:12px}
+.subs .st{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px!important}
+.subs p{font-size:12.5px;color:var(--ink2);line-height:1.65;margin:0 0 10px!important}
+.subs p.how{color:var(--ink3);font-size:12px;margin:10px 0 0!important}
+.subs code{display:block;font:12px/1.5 var(--num);color:var(--ink);background:var(--surface2);
+           border-radius:8px;padding:10px 12px;word-break:break-all;margin-bottom:10px}
+.calbig:active{filter:brightness(.92)}
+.calone{font:600 12.5px/1 var(--font);color:var(--navy);background:none;
+        border:1px solid var(--navy);border-radius:9px;padding:9px 13px;cursor:pointer;margin-top:10px}
+.calone:active{background:var(--surface2)}
+.ver{display:flex;align-items:baseline;gap:10px;font-size:12.5px;color:var(--ink3);
+     padding-bottom:11px;margin-bottom:11px!important;border-bottom:1px solid var(--rule)}
+.ver b{margin-left:auto;font-family:var(--num);color:var(--ink);font-weight:700}
+.notes{padding:0!important;overflow:hidden}
+.notes.fresh{border-color:var(--gold)}
+.nhead{width:100%;display:flex;align-items:center;gap:10px;background:none;border:0;
+       font:700 13px/1 var(--font);color:var(--ink);padding:15px 16px;cursor:pointer;text-align:left}
+.notes.fresh .nhead{background:var(--gold-bg);color:var(--gold)}
+.nhead .nx{margin-left:auto;font-weight:600;font-size:11.5px;color:var(--ink3)}
+.notes.fresh .nhead .nx{color:var(--gold)}
+.nbody{padding:2px 16px 14px}
+.nver{padding-top:12px}
+.nver + .nver{border-top:1px solid var(--rule);margin-top:12px}
+.nver .nv{font-size:11.5px;font-weight:700;color:var(--ink3);letter-spacing:.03em}
+.nbody ul{margin:7px 0 0!important;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.nbody li{font-size:13px;color:var(--ink2);line-height:1.6}
+.nbody li b{color:var(--ink)}
+.noti{border-top:1px solid var(--rule);margin-top:12px;padding-top:12px}
+.noti .ns{font-size:12px;color:var(--ink2);line-height:1.6}
+.mini{font-size:12px;color:var(--ink3);line-height:1.7}
+.ghost{font:inherit;font-size:12.5px;color:var(--ink2);background:none;border:1px solid var(--rule);
+       border-radius:10px;padding:11px 14px;cursor:pointer;width:100%;margin-top:10px}
+
+/* ── 하단 탭 ── */
+nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--bar);
+    border-top:1px solid var(--rule);display:flex;
+    padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;border:0;cursor:pointer;font:inherit;color:var(--ink3);
+           height:var(--nav-h);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+nav button .ic{font-size:19px;line-height:1}
+nav button .lb{font-size:10.5px;font-weight:600}
+nav button[aria-selected="true"]{color:var(--navy)}
+nav button:active{background:var(--surface2)}
+
+.toast{position:fixed;left:50%;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);
+       transform:translateX(-50%) translateY(14px);background:var(--ink);color:var(--bg);
+       font-size:13px;padding:11px 18px;border-radius:999px;opacity:0;pointer-events:none;
+       transition:opacity .2s,transform .2s;z-index:40;max-width:88vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<div id="app">
+<header class="bar">
+  <div>
+    <div class="ttl">학점 관리</div>
+    <div class="sub">학점은행제 · 컴퓨터공학 공학사</div>
+  </div>
+  <div class="sp"></div>
+  <div class="net" id="net"><span class="nd"></span><span id="nt">온라인</span></div>
+  <button class="pill go" id="install" hidden type="button">앱 설치</button>
+</header>
+
+<main>
+  <section class="view on" id="v0"></section>
+  <section class="view" id="v1"></section>
+  <section class="view" id="v2"></section>
+</main>
+
+<nav role="tablist">
+  <button role="tab" aria-selected="true" data-v="0"><span class="ic">◎</span><span class="lb">현황</span></button>
+  <button role="tab" aria-selected="false" data-v="1"><span class="ic">☰</span><span class="lb">항목</span></button>
+  <button role="tab" aria-selected="false" data-v="2"><span class="ic">◷</span><span class="lb">일정</span></button>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+<script>window.__HAKJEOM__={"항목":[{"이름":"컴퓨터시스템기사","학점":20,"구분":"전공","기본상태":"인정완료","호환":false,"시점":"완료","메모":"직무번호 02"},{"이름":"K-MOOC 기이수분","학점":22,"구분":"일반","기본상태":"인정완료","호환":false,"시점":"완료","메모":"평가인정 18학점↑ 요건 충족"},{"이름":"빅데이터개론","학점":3,"구분":"교양","기본상태":"신청완료","호환":true,"시점":"2026(하)","메모":"인하공전 · 교양으로 지정해야 함"},{"이름":"문화관광론","학점":2,"구분":"교양","기본상태":"신청완료","호환":false,"시점":"2026(하)","메모":"인하공전 · 예술·문화·체육"},{"이름":"실용한문","학점":3,"구분":"교양","기본상태":"신청완료","호환":false,"시점":"8/10 신청","메모":"성신여대 · 국어와 문학 · 8/10 신청함"},{"이름":"현대인의정신건강","학점":3,"구분":"교양","기본상태":"신청완료","호환":true,"시점":"8/10 신청","메모":"성신여대 · 교양으로 지정해야 함 · 8/10 신청함"},{"이름":"커피학개론","학점":3,"구분":"교양","기본상태":"예정","호환":false,"시점":"8/17 신청","메모":"남서울대 · 예술·문화·체육 · 마감 9/6"},{"이름":"평생교육론","학점":3,"구분":"교양","기본상태":"예정","호환":true,"시점":"8/17 신청","메모":"남서울대 · 교양으로 지정해야 함"},{"이름":"인공지능","학점":3,"구분":"전공","기본상태":"예정","호환":false,"시점":"8/17 신청","메모":"한동대 · 전공선택 · 마감 9/13"},{"이름":"효과적인성인교육방법","학점":3,"구분":"교양","기본상태":"예정","호환":false,"시점":"8/18 신청","메모":"건양사이버대 · 인간과 사회 · 마감 9/13"},{"이름":"정보처리기사","학점":20,"구분":"전공","기본상태":"예정","호환":false,"시점":"2027","메모":"직무번호 01 · 접수는 회차당 4일뿐"},{"이름":"네트워크관리사 2급","학점":14,"구분":"전공","기본상태":"예정","호환":false,"시점":"2027","메모":"직무번호 03 · 공인유효기간 2029.01.19"},{"이름":"독학사 2과정 2과목","학점":10,"구분":"전공","기본상태":"예정","호환":false,"시점":"2027.4 접수","메모":"연 1회 · 한 과목 떨어져도 전공 62"},{"이름":"2027(상) K-MOOC 교양","학점":10,"구분":"교양","기본상태":"예정","호환":false,"시점":"2027(상)","메모":"교양 30 채우는 마지막 조각"},{"이름":"2027(상) K-MOOC 자유","학점":14,"구분":"일반","기본상태":"예정","호환":false,"시점":"2027(상)","메모":"전공·교양 강좌가 있으면 그걸 우선"},{"이름":"2027(하) K-MOOC","학점":7,"구분":"일반","기본상태":"예정","호환":false,"시점":"2027(하)","메모":"마지막 학기 · 잔여만"}],"일정":[{"날짜":"2026-08-10","확정":true,"제목":"실용한문 · 현대인의정신건강 신청 + 반도체공학Ⅰ 취소","본문":"성신여대 · 각 3학점 · 교양 (현대인의정신건강은 호환 → 교양 지정)\n선착순 정원제라 개시일에 바로 넣을 것 · 마감 9/6\n★ 같은 날 반도체공학Ⅰ(일반선택 3학점)을 취소할 것 — 학기 24학점 자리를 비워야\n  인공지능(전공)과 효과적인성인교육방법(교양)이 들어갑니다. 수강 시작 8/17 전에.","ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:학점 실용한문 · 현대인의정신건강 신청 + 반\r\n 도체공학Ⅰ 취소\r\nX-WR-TIMEZONE:Asia/Seoul\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Seoul\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETFROM:+0900\r\nTZOFFSETTO:+0900\r\nTZNAME:KST\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-08-10-43a9e6d6bf5b@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T090000\r\nDTEND;TZID=Asia/Seoul:20260810T093000\r\nSUMMARY:[학점] 실용한문 · 현대인의정신건강 신청 + 반도\r\n 체공학Ⅰ 취소\r\nDESCRIPTION:성신여대 · 각 3학점 · 교양 (현대인의정신건\r\n 강은 호환 → 교양 지정)\\n선착순 정원제라 개시일에 \r\n 바로 넣을 것 · 마감 9/6\\n★ 같은 날 반도체공학Ⅰ(일\r\n 반선택 3학점)을 취소할 것 — 학기 24학점 자리를 비워\r\n 야\\n  인공지능(전공)과 효과적인성인교육방법(교양)이\r\n  들어갑니다. 수강 시작 8/17 전에.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:실용한문 · 현대인의정신건강 신청 + 반도체\r\n 공학Ⅰ 취소\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P1D\r\nDESCRIPTION:1일 뒤 — 실용한문 · 현대인의정신건강 신청 \r\n + 반도체공학Ⅰ 취소\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"},{"날짜":"2026-08-17","확정":true,"제목":"커피학개론 · 평생교육론 · 인공지능 신청 시작","본문":"커피학개론 3 (남서울대 · 교양) · 평생교육론 3 (남서울대 · 호환 → 교양 지정)\n인공지능 3 (한동대 · 컴퓨터공학 전공선택) — 독학사가 한 과목 떨어져도 전공 62가 되는 보험\n마감: 남서울대 9/6 · 한동대 9/13","ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:학점 커피학개론 · 평생교육론 · 인공지능 \r\n 신청 시작\r\nX-WR-TIMEZONE:Asia/Seoul\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Seoul\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETFROM:+0900\r\nTZOFFSETTO:+0900\r\nTZNAME:KST\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-08-17-7ce37824b335@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260817T090000\r\nDTEND;TZID=Asia/Seoul:20260817T093000\r\nSUMMARY:[학점] 커피학개론 · 평생교육론 · 인공지능 신\r\n 청 시작\r\nDESCRIPTION:커피학개론 3 (남서울대 · 교양) · 평생교육론\r\n  3 (남서울대 · 호환 → 교양 지정)\\n인공지능 3 (한동대\r\n  · 컴퓨터공학 전공선택) — 독학사가 한 과목 떨어져\r\n 도 전공 62가 되는 보험\\n마감: 남서울대 9/6 · 한동대 9/\r\n 13\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:커피학개론 · 평생교육론 · 인공지능 신청 시\r\n 작\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P1D\r\nDESCRIPTION:1일 뒤 — 커피학개론 · 평생교육론 · 인공지\r\n 능 신청 시작\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"},{"날짜":"2026-08-18","확정":true,"제목":"효과적인성인교육방법 신청 시작","본문":"건양사이버대 · 3학점 · 교양 [인간과 사회]\n이름과 달리 교양입니다 (표준교육과정 원본 대조 완료) · 마감 9/13","ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:학점 효과적인성인교육방법 신청 시작\r\nX-WR-TIMEZONE:Asia/Seoul\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Seoul\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETFROM:+0900\r\nTZOFFSETTO:+0900\r\nTZNAME:KST\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-08-18-75ff5e12de62@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260818T090000\r\nDTEND;TZID=Asia/Seoul:20260818T093000\r\nSUMMARY:[학점] 효과적인성인교육방법 신청 시작\r\nDESCRIPTION:건양사이버대 · 3학점 · 교양 [인간과 사회]\\n\r\n 이름과 달리 교양입니다 (표준교육과정 원본 대조 완\r\n 료) · 마감 9/13\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:효과적인성인교육방법 신청 시작\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P1D\r\nDESCRIPTION:1일 뒤 — 효과적인성인교육방법 신청 시작\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"},{"날짜":"2026-09-06","확정":true,"제목":"성신여대 · 남서울대 마감","본문":"실용한문 · 현대인의정신건강 · 커피학개론 · 평생교육론 — 오늘까지","ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:학점 성신여대 · 남서울대 마감\r\nX-WR-TIMEZONE:Asia/Seoul\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Seoul\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETFROM:+0900\r\nTZOFFSETTO:+0900\r\nTZNAME:KST\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-09-06-2e1373f2f6f2@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260906T090000\r\nDTEND;TZID=Asia/Seoul:20260906T093000\r\nSUMMARY:[학점] 성신여대 · 남서울대 마감\r\nDESCRIPTION:실용한문 · 현대인의정신건강 · 커피학개론 \r\n · 평생교육론 — 오늘까지\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:성신여대 · 남서울대 마감\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P3D\r\nDESCRIPTION:3일 뒤 — 성신여대 · 남서울대 마감\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P1D\r\nDESCRIPTION:1일 뒤 — 성신여대 · 남서울대 마감\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"},{"날짜":"2026-09-13","확정":true,"제목":"한동대 · 건양사이버대 마감","본문":"인공지능 · 효과적인성인교육방법 — 오늘까지\n이번 학기 목표: 23학점 = 교양 20 + 전공 3","ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:학점 한동대 · 건양사이버대 마감\r\nX-WR-TIMEZONE:Asia/Seoul\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Seoul\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETFROM:+0900\r\nTZOFFSETTO:+0900\r\nTZNAME:KST\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-09-13-00e27c28e3e2@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260913T090000\r\nDTEND;TZID=Asia/Seoul:20260913T093000\r\nSUMMARY:[학점] 한동대 · 건양사이버대 마감\r\nDESCRIPTION:인공지능 · 효과적인성인교육방법 — 오늘까\r\n 지\\n이번 학기 목표: 23학점 = 교양 20 + 전공 3\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:한동대 · 건양사이버대 마감\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P3D\r\nDESCRIPTION:3일 뒤 — 한동대 · 건양사이버대 마감\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P1D\r\nDESCRIPTION:1일 뒤 — 한동대 · 건양사이버대 마감\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"},{"날짜":"2026-09-01","확정":true,"제목":"학점 관리 앱 판 1.4 배포하기","본문":"8월에 Netlify 용량이 차서 못 올렸습니다. 달이 바뀌었으니 지금 올리세요.\n산출물\\학점관리앱_PWA.zip 을 기존 사이트의 Deploys 탭에 끌어다 놓을 것\n(새로 드롭하면 새 사이트가 생겨 설치된 앱과 끊어집니다)\n올린 뒤 앱에서 「알림 켜기」를 한 번 누르면 폰 알림이 켜집니다.\n★ 그전까지 폰 앱의 숫자는 옛 계획(20학점)입니다 — 실제는 23학점입니다.","ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:학점 학점 관리 앱 판 1.4 배포하기\r\nX-WR-TIMEZONE:Asia/Seoul\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Seoul\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETFROM:+0900\r\nTZOFFSETTO:+0900\r\nTZNAME:KST\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-09-01-69dfcba71b29@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260901T090000\r\nDTEND;TZID=Asia/Seoul:20260901T093000\r\nSUMMARY:[학점] 학점 관리 앱 판 1.4 배포하기\r\nDESCRIPTION:8월에 Netlify 용량이 차서 못 올렸습니다. 달이 \r\n 바뀌었으니 지금 올리세요.\\n산출물\\\\학점관리앱_PWA.zip\r\n  을 기존 사이트의 Deploys 탭에 끌어다 놓을 것\\n(새로 \r\n 드롭하면 새 사이트가 생겨 설치된 앱과 끊어집니다)\\n\r\n 올린 뒤 앱에서 「알림 켜기」를 한 번 누르면 폰 알림\r\n 이 켜집니다.\\n★ 그전까지 폰 앱의 숫자는 옛 계획(20\r\n 학점)입니다 — 실제는 23학점입니다.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:학점 관리 앱 판 1.4 배포하기\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P1D\r\nDESCRIPTION:1일 뒤 — 학점 관리 앱 판 1.4 배포하기\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"},{"날짜":"2026-11-23","확정":true,"제목":"2026(하) K-MOOC 종강 임박","본문":"11/29 종강 · 미이수 강의가 없는지 확인","ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:학점 2026(하) K-MOOC 종강 임박\r\nX-WR-TIMEZONE:Asia/Seoul\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Seoul\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETFROM:+0900\r\nTZOFFSETTO:+0900\r\nTZNAME:KST\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-11-23-1f5135fb3462@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20261123T090000\r\nDTEND;TZID=Asia/Seoul:20261123T093000\r\nSUMMARY:[학점] 2026(하) K-MOOC 종강 임박\r\nDESCRIPTION:11/29 종강 · 미이수 강의가 없는지 확인\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:2026(하) K-MOOC 종강 임박\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"},{"날짜":"2027-01-04","확정":false,"제목":"1월 등록월 — 23학점 인정신청","본문":"★ 호환과목 3개를 반드시 '교양'으로 지정할 것 (9학점이 걸린 문제)\n  빅데이터개론 · 현대인의정신건강 · 평생교육론\ncb.or.kr [학점인정 신청]. 등록월은 1·4·7·10월뿐","ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:학점 1월 등록월 — 23학점 인정신청\r\nX-WR-TIMEZONE:Asia/Seoul\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Seoul\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETFROM:+0900\r\nTZOFFSETTO:+0900\r\nTZNAME:KST\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-01-04-15afcc2b5052@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20270104T090000\r\nDTEND;TZID=Asia/Seoul:20270104T093000\r\nSUMMARY:[학점] 1월 등록월 — 23학점 인정신청 (날짜 추정)\r\nDESCRIPTION:★ 호환과목 3개를 반드시 '교양'으로 지정할 \r\n 것 (9학점이 걸린 문제)\\n  빅데이터개론 · 현대인의정\r\n 신건강 · 평생교육론\\ncb.or.kr [학점인정 신청]. 등록월\r\n 은 1·4·7·10월뿐\\n\\n※ 아직 공고 전이라 날짜는 추정입\r\n 니다. 공고로 확인하고 이 일정을 고치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:1월 등록월 — 23학점 인정신청\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P7D\r\nDESCRIPTION:7일 뒤 — 1월 등록월 — 23학점 인정신청\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"},{"날짜":"2027-01-04","확정":false,"제목":"2027년 일정 공고로 확정하기","본문":"독학사 시행계획 · 기사 시험일정 · 학위신청 기간을 공식 공고로 확인\n국가평생교육진흥원 1600-0400\n이 일정표의 2027년 날짜는 전부 추정이므로 여기서 바로잡을 것","ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:학점 2027년 일정 공고로 확정하기\r\nX-WR-TIMEZONE:Asia/Seoul\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Seoul\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETFROM:+0900\r\nTZOFFSETTO:+0900\r\nTZNAME:KST\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-01-04-143312031f2d@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20270104T090000\r\nDTEND;TZID=Asia/Seoul:20270104T093000\r\nSUMMARY:[학점] 2027년 일정 공고로 확정하기 (날짜 추정)\r\nDESCRIPTION:독학사 시행계획 · 기사 시험일정 · 학위신청\r\n  기간을 공식 공고로 확인\\n국가평생교육진흥원 1600-040\r\n 0\\n이 일정표의 2027년 날짜는 전부 추정이므로 여기서 \r\n 바로잡을 것\\n\\n※ 아직 공고 전이라 날짜는 추정입니\r\n 다. 공고로 확인하고 이 일정을 고치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:2027년 일정 공고로 확정하기\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"},{"날짜":"2027-01-11","확정":false,"제목":"정보처리기사 1회 필기 접수","본문":"접수는 회차당 월~목 4일뿐 — 놓치기 쉬움\nq-net.or.kr 공고로 정확한 날짜 확인","ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:학점 정보처리기사 1회 필기 접수\r\nX-WR-TIMEZONE:Asia/Seoul\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Seoul\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETFROM:+0900\r\nTZOFFSETTO:+0900\r\nTZNAME:KST\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-01-11-46c46eff947d@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20270111T090000\r\nDTEND;TZID=Asia/Seoul:20270111T093000\r\nSUMMARY:[학점] 정보처리기사 1회 필기 접수 (날짜 추정)\r\nDESCRIPTION:접수는 회차당 월~목 4일뿐 — 놓치기 쉬움\\nq-n\r\n et.or.kr 공고로 정확한 날짜 확인\\n\\n※ 아직 공고 전이\r\n 라 날짜는 추정입니다. 공고로 확인하고 이 일정을 고\r\n 치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:정보처리기사 1회 필기 접수\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P3D\r\nDESCRIPTION:3일 뒤 — 정보처리기사 1회 필기 접수\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"},{"날짜":"2027-02-01","확정":false,"제목":"2027(상) K-MOOC 개설목록 확인","본문":"★ 남은 교양 10학점이 최우선. 그다음은 전공 강좌를 우선으로 담을 것\n판정은 python 판정.py 로 — 이름만 보고 짐작하면 틀립니다\n목표 24학점","ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:학점 2027(상) K-MOOC 개설목록 확인\r\nX-WR-TIMEZONE:Asia/Seoul\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Seoul\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETFROM:+0900\r\nTZOFFSETTO:+0900\r\nTZNAME:KST\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-02-01-3d4552054ca3@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20270201T090000\r\nDTEND;TZID=Asia/Seoul:20270201T093000\r\nSUMMARY:[학점] 2027(상) K-MOOC 개설목록 확인 (날짜 추정)\r\nDESCRIPTION:★ 남은 교양 10학점이 최우선. 그다음은 전공 \r\n 강좌를 우선으로 담을 것\\n판정은 python 판정.py 로 — \r\n 이름만 보고 짐작하면 틀립니다\\n목표 24학점\\n\\n※ 아\r\n 직 공고 전이라 날짜는 추정입니다. 공고로 확인하고 \r\n 이 일정을 고치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:2027(상) K-MOOC 개설목록 확인\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"},{"날짜":"2027-04-01","확정":false,"제목":"독학사 2과정 접수 공고 확인","본문":"★ 연 1회뿐 — 놓치면 학위가 1년 밀림\n접수는 보통 4월 하순 약 일주일\nbdes.nile.or.kr","ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:학점 독학사 2과정 접수 공고 확인\r\nX-WR-TIMEZONE:Asia/Seoul\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Seoul\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETFROM:+0900\r\nTZOFFSETTO:+0900\r\nTZNAME:KST\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-04-01-1a4f34a88705@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20270401T090000\r\nDTEND;TZID=Asia/Seoul:20270401T093000\r\nSUMMARY:[학점] 독학사 2과정 접수 공고 확인 (날짜 추정)\r\nDESCRIPTION:★ 연 1회뿐 — 놓치면 학위가 1년 밀림\\n접수\r\n 는 보통 4월 하순 약 일주일\\nbdes.nile.or.kr\\n\\n※ 아직 공\r\n 고 전이라 날짜는 추정입니다. 공고로 확인하고 이 일\r\n 정을 고치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:독학사 2과정 접수 공고 확인\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"},{"날짜":"2027-04-19","확정":false,"제목":"독학사 2과정 2과목 접수 주간","본문":"★ 연 1회 · 이번 주 안에 반드시 접수\n컴퓨터공학 2과목 = 전공 10학점. 인공지능 3학점을 미리 담아 뒀으므로\n한 과목이 떨어져도 전공 62로 안전합니다\n정확한 날짜는 4월 초 공고로 확인해 이 일정을 고칠 것","ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:학점 독학사 2과정 2과목 접수 주간\r\nX-WR-TIMEZONE:Asia/Seoul\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Seoul\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETFROM:+0900\r\nTZOFFSETTO:+0900\r\nTZNAME:KST\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-04-19-f39b832bb24a@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20270419T090000\r\nDTEND;TZID=Asia/Seoul:20270419T093000\r\nSUMMARY:[학점] 독학사 2과정 2과목 접수 주간 (날짜 추정)\r\nDESCRIPTION:★ 연 1회 · 이번 주 안에 반드시 접수\\n컴퓨터\r\n 공학 2과목 = 전공 10학점. 인공지능 3학점을 미리 담아 \r\n 뒀으므로\\n한 과목이 떨어져도 전공 62로 안전합니다\\n\r\n 정확한 날짜는 4월 초 공고로 확인해 이 일정을 고칠 \r\n 것\\n\\n※ 아직 공고 전이라 날짜는 추정입니다. 공고로 \r\n 확인하고 이 일정을 고치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:독학사 2과정 2과목 접수 주간\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P3D\r\nDESCRIPTION:3일 뒤 — 독학사 2과정 2과목 접수 주간\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P1D\r\nDESCRIPTION:1일 뒤 — 독학사 2과정 2과목 접수 주간\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"},{"날짜":"2027-07-01","확정":false,"제목":"7월 등록월 — 68학점 일괄 인정신청","본문":"정보처리기사 20 + 네트워크관리사 2급 14 + 독학사 10 = 44학점\n2027(상) K-MOOC 24학점도 같은 달에 신청 → 누적 133학점\n이 달에 전공 60과 교양 30이 둘 다 채워집니다","ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:학점 7월 등록월 — 68학점 일괄 인정신청\r\nX-WR-TIMEZONE:Asia/Seoul\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Seoul\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETFROM:+0900\r\nTZOFFSETTO:+0900\r\nTZNAME:KST\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-07-01-256332c9cf65@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20270701T090000\r\nDTEND;TZID=Asia/Seoul:20270701T093000\r\nSUMMARY:[학점] 7월 등록월 — 68학점 일괄 인정신청 (날짜 \r\n 추정)\r\nDESCRIPTION:정보처리기사 20 + 네트워크관리사 2급 14 + 독\r\n 학사 10 = 44학점\\n2027(상) K-MOOC 24학점도 같은 달에 신청 \r\n → 누적 133학점\\n이 달에 전공 60과 교양 30이 둘 다 채\r\n 워집니다\\n\\n※ 아직 공고 전이라 날짜는 추정입니다. \r\n 공고로 확인하고 이 일정을 고치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:7월 등록월 — 68학점 일괄 인정신청\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P7D\r\nDESCRIPTION:7일 뒤 — 7월 등록월 — 68학점 일괄 인정신청\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"},{"날짜":"2027-08-02","확정":false,"제목":"2027(하) K-MOOC 7학점 신청","본문":"마지막 학기 · 잔여 7학점만 가볍게","ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:학점 2027(하) K-MOOC 7학점 신청\r\nX-WR-TIMEZONE:Asia/Seoul\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Seoul\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETFROM:+0900\r\nTZOFFSETTO:+0900\r\nTZNAME:KST\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-08-02-2624a66c301b@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20270802T090000\r\nDTEND;TZID=Asia/Seoul:20270802T093000\r\nSUMMARY:[학점] 2027(하) K-MOOC 7학점 신청 (날짜 추정)\r\nDESCRIPTION:마지막 학기 · 잔여 7학점만 가볍게\\n\\n※ 아직\r\n  공고 전이라 날짜는 추정입니다. 공고로 확인하고 이 \r\n 일정을 고치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:2027(하) K-MOOC 7학점 신청\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"},{"날짜":"2027-12-01","확정":false,"제목":"전기 학위신청 기간 확인","본문":"12월~1월 · 최종 인정신청과 함께 진행","ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:학점 전기 학위신청 기간 확인\r\nX-WR-TIMEZONE:Asia/Seoul\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Seoul\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETFROM:+0900\r\nTZOFFSETTO:+0900\r\nTZNAME:KST\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-12-01-a0fe41215aa3@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20271201T090000\r\nDTEND;TZID=Asia/Seoul:20271201T093000\r\nSUMMARY:[학점] 전기 학위신청 기간 확인 (날짜 추정)\r\nDESCRIPTION:12월~1월 · 최종 인정신청과 함께 진행\\n\\n※ 아\r\n 직 공고 전이라 날짜는 추정입니다. 공고로 확인하고 \r\n 이 일정을 고치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:전기 학위신청 기간 확인\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"},{"날짜":"2028-01-04","확정":false,"제목":"최종 인정신청 + 학위신청 마무리","본문":"140학점 완성 → 2028년 2월 공학사(컴퓨터공학) 학위 수여","ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:학점 최종 인정신청 + 학위신청 마무리\r\nX-WR-TIMEZONE:Asia/Seoul\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Seoul\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETFROM:+0900\r\nTZOFFSETTO:+0900\r\nTZNAME:KST\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:hakjeom-2028-01-04-7485b2934ca9@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20280104T090000\r\nDTEND;TZID=Asia/Seoul:20280104T093000\r\nSUMMARY:[학점] 최종 인정신청 + 학위신청 마무리 (날짜 추\r\n 정)\r\nDESCRIPTION:140학점 완성 → 2028년 2월 공학사(컴퓨터공학) \r\n 학위 수여\\n\\n※ 아직 공고 전이라 날짜는 추정입니다. \r\n 공고로 확인하고 이 일정을 고치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:최종 인정신청 + 학위신청 마무리\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P7D\r\nDESCRIPTION:7일 뒤 — 최종 인정신청 + 학위신청 마무리\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"}],"전체ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:학점은행제 일정\r\nX-WR-TIMEZONE:Asia/Seoul\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Seoul\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\nTZOFFSETFROM:+0900\r\nTZOFFSETTO:+0900\r\nTZNAME:KST\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-08-10-43a9e6d6bf5b@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T090000\r\nDTEND;TZID=Asia/Seoul:20260810T093000\r\nSUMMARY:[학점] 실용한문 · 현대인의정신건강 신청 + 반도\r\n 체공학Ⅰ 취소\r\nDESCRIPTION:성신여대 · 각 3학점 · 교양 (현대인의정신건\r\n 강은 호환 → 교양 지정)\\n선착순 정원제라 개시일에 \r\n 바로 넣을 것 · 마감 9/6\\n★ 같은 날 반도체공학Ⅰ(일\r\n 반선택 3학점)을 취소할 것 — 학기 24학점 자리를 비워\r\n 야\\n  인공지능(전공)과 효과적인성인교육방법(교양)이\r\n  들어갑니다. 수강 시작 8/17 전에.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:실용한문 · 현대인의정신건강 신청 + 반도체\r\n 공학Ⅰ 취소\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P1D\r\nDESCRIPTION:1일 뒤 — 실용한문 · 현대인의정신건강 신청 \r\n + 반도체공학Ⅰ 취소\r\nEND:VALARM\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-08-17-7ce37824b335@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260817T090000\r\nDTEND;TZID=Asia/Seoul:20260817T093000\r\nSUMMARY:[학점] 커피학개론 · 평생교육론 · 인공지능 신\r\n 청 시작\r\nDESCRIPTION:커피학개론 3 (남서울대 · 교양) · 평생교육론\r\n  3 (남서울대 · 호환 → 교양 지정)\\n인공지능 3 (한동대\r\n  · 컴퓨터공학 전공선택) — 독학사가 한 과목 떨어져\r\n 도 전공 62가 되는 보험\\n마감: 남서울대 9/6 · 한동대 9/\r\n 13\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:커피학개론 · 평생교육론 · 인공지능 신청 시\r\n 작\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P1D\r\nDESCRIPTION:1일 뒤 — 커피학개론 · 평생교육론 · 인공지\r\n 능 신청 시작\r\nEND:VALARM\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-08-18-75ff5e12de62@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260818T090000\r\nDTEND;TZID=Asia/Seoul:20260818T093000\r\nSUMMARY:[학점] 효과적인성인교육방법 신청 시작\r\nDESCRIPTION:건양사이버대 · 3학점 · 교양 [인간과 사회]\\n\r\n 이름과 달리 교양입니다 (표준교육과정 원본 대조 완\r\n 료) · 마감 9/13\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:효과적인성인교육방법 신청 시작\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P1D\r\nDESCRIPTION:1일 뒤 — 효과적인성인교육방법 신청 시작\r\nEND:VALARM\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-09-06-2e1373f2f6f2@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260906T090000\r\nDTEND;TZID=Asia/Seoul:20260906T093000\r\nSUMMARY:[학점] 성신여대 · 남서울대 마감\r\nDESCRIPTION:실용한문 · 현대인의정신건강 · 커피학개론 \r\n · 평생교육론 — 오늘까지\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:성신여대 · 남서울대 마감\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P3D\r\nDESCRIPTION:3일 뒤 — 성신여대 · 남서울대 마감\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P1D\r\nDESCRIPTION:1일 뒤 — 성신여대 · 남서울대 마감\r\nEND:VALARM\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-09-13-00e27c28e3e2@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260913T090000\r\nDTEND;TZID=Asia/Seoul:20260913T093000\r\nSUMMARY:[학점] 한동대 · 건양사이버대 마감\r\nDESCRIPTION:인공지능 · 효과적인성인교육방법 — 오늘까\r\n 지\\n이번 학기 목표: 23학점 = 교양 20 + 전공 3\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:한동대 · 건양사이버대 마감\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P3D\r\nDESCRIPTION:3일 뒤 — 한동대 · 건양사이버대 마감\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P1D\r\nDESCRIPTION:1일 뒤 — 한동대 · 건양사이버대 마감\r\nEND:VALARM\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-09-01-69dfcba71b29@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260901T090000\r\nDTEND;TZID=Asia/Seoul:20260901T093000\r\nSUMMARY:[학점] 학점 관리 앱 판 1.4 배포하기\r\nDESCRIPTION:8월에 Netlify 용량이 차서 못 올렸습니다. 달이 \r\n 바뀌었으니 지금 올리세요.\\n산출물\\\\학점관리앱_PWA.zip\r\n  을 기존 사이트의 Deploys 탭에 끌어다 놓을 것\\n(새로 \r\n 드롭하면 새 사이트가 생겨 설치된 앱과 끊어집니다)\\n\r\n 올린 뒤 앱에서 「알림 켜기」를 한 번 누르면 폰 알림\r\n 이 켜집니다.\\n★ 그전까지 폰 앱의 숫자는 옛 계획(20\r\n 학점)입니다 — 실제는 23학점입니다.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:학점 관리 앱 판 1.4 배포하기\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P1D\r\nDESCRIPTION:1일 뒤 — 학점 관리 앱 판 1.4 배포하기\r\nEND:VALARM\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-11-23-1f5135fb3462@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20261123T090000\r\nDTEND;TZID=Asia/Seoul:20261123T093000\r\nSUMMARY:[학점] 2026(하) K-MOOC 종강 임박\r\nDESCRIPTION:11/29 종강 · 미이수 강의가 없는지 확인\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:2026(하) K-MOOC 종강 임박\r\nEND:VALARM\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-01-04-15afcc2b5052@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20270104T090000\r\nDTEND;TZID=Asia/Seoul:20270104T093000\r\nSUMMARY:[학점] 1월 등록월 — 23학점 인정신청 (날짜 추정)\r\nDESCRIPTION:★ 호환과목 3개를 반드시 '교양'으로 지정할 \r\n 것 (9학점이 걸린 문제)\\n  빅데이터개론 · 현대인의정\r\n 신건강 · 평생교육론\\ncb.or.kr [학점인정 신청]. 등록월\r\n 은 1·4·7·10월뿐\\n\\n※ 아직 공고 전이라 날짜는 추정입\r\n 니다. 공고로 확인하고 이 일정을 고치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:1월 등록월 — 23학점 인정신청\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P7D\r\nDESCRIPTION:7일 뒤 — 1월 등록월 — 23학점 인정신청\r\nEND:VALARM\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-01-04-143312031f2d@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20270104T090000\r\nDTEND;TZID=Asia/Seoul:20270104T093000\r\nSUMMARY:[학점] 2027년 일정 공고로 확정하기 (날짜 추정)\r\nDESCRIPTION:독학사 시행계획 · 기사 시험일정 · 학위신청\r\n  기간을 공식 공고로 확인\\n국가평생교육진흥원 1600-040\r\n 0\\n이 일정표의 2027년 날짜는 전부 추정이므로 여기서 \r\n 바로잡을 것\\n\\n※ 아직 공고 전이라 날짜는 추정입니\r\n 다. 공고로 확인하고 이 일정을 고치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:2027년 일정 공고로 확정하기\r\nEND:VALARM\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-01-11-46c46eff947d@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20270111T090000\r\nDTEND;TZID=Asia/Seoul:20270111T093000\r\nSUMMARY:[학점] 정보처리기사 1회 필기 접수 (날짜 추정)\r\nDESCRIPTION:접수는 회차당 월~목 4일뿐 — 놓치기 쉬움\\nq-n\r\n et.or.kr 공고로 정확한 날짜 확인\\n\\n※ 아직 공고 전이\r\n 라 날짜는 추정입니다. 공고로 확인하고 이 일정을 고\r\n 치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:정보처리기사 1회 필기 접수\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P3D\r\nDESCRIPTION:3일 뒤 — 정보처리기사 1회 필기 접수\r\nEND:VALARM\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-02-01-3d4552054ca3@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20270201T090000\r\nDTEND;TZID=Asia/Seoul:20270201T093000\r\nSUMMARY:[학점] 2027(상) K-MOOC 개설목록 확인 (날짜 추정)\r\nDESCRIPTION:★ 남은 교양 10학점이 최우선. 그다음은 전공 \r\n 강좌를 우선으로 담을 것\\n판정은 python 판정.py 로 — \r\n 이름만 보고 짐작하면 틀립니다\\n목표 24학점\\n\\n※ 아\r\n 직 공고 전이라 날짜는 추정입니다. 공고로 확인하고 \r\n 이 일정을 고치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:2027(상) K-MOOC 개설목록 확인\r\nEND:VALARM\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-04-01-1a4f34a88705@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20270401T090000\r\nDTEND;TZID=Asia/Seoul:20270401T093000\r\nSUMMARY:[학점] 독학사 2과정 접수 공고 확인 (날짜 추정)\r\nDESCRIPTION:★ 연 1회뿐 — 놓치면 학위가 1년 밀림\\n접수\r\n 는 보통 4월 하순 약 일주일\\nbdes.nile.or.kr\\n\\n※ 아직 공\r\n 고 전이라 날짜는 추정입니다. 공고로 확인하고 이 일\r\n 정을 고치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:독학사 2과정 접수 공고 확인\r\nEND:VALARM\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-04-19-f39b832bb24a@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20270419T090000\r\nDTEND;TZID=Asia/Seoul:20270419T093000\r\nSUMMARY:[학점] 독학사 2과정 2과목 접수 주간 (날짜 추정)\r\nDESCRIPTION:★ 연 1회 · 이번 주 안에 반드시 접수\\n컴퓨터\r\n 공학 2과목 = 전공 10학점. 인공지능 3학점을 미리 담아 \r\n 뒀으므로\\n한 과목이 떨어져도 전공 62로 안전합니다\\n\r\n 정확한 날짜는 4월 초 공고로 확인해 이 일정을 고칠 \r\n 것\\n\\n※ 아직 공고 전이라 날짜는 추정입니다. 공고로 \r\n 확인하고 이 일정을 고치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:독학사 2과정 2과목 접수 주간\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P3D\r\nDESCRIPTION:3일 뒤 — 독학사 2과정 2과목 접수 주간\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P1D\r\nDESCRIPTION:1일 뒤 — 독학사 2과정 2과목 접수 주간\r\nEND:VALARM\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-07-01-256332c9cf65@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20270701T090000\r\nDTEND;TZID=Asia/Seoul:20270701T093000\r\nSUMMARY:[학점] 7월 등록월 — 68학점 일괄 인정신청 (날짜 \r\n 추정)\r\nDESCRIPTION:정보처리기사 20 + 네트워크관리사 2급 14 + 독\r\n 학사 10 = 44학점\\n2027(상) K-MOOC 24학점도 같은 달에 신청 \r\n → 누적 133학점\\n이 달에 전공 60과 교양 30이 둘 다 채\r\n 워집니다\\n\\n※ 아직 공고 전이라 날짜는 추정입니다. \r\n 공고로 확인하고 이 일정을 고치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:7월 등록월 — 68학점 일괄 인정신청\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P7D\r\nDESCRIPTION:7일 뒤 — 7월 등록월 — 68학점 일괄 인정신청\r\nEND:VALARM\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-08-02-2624a66c301b@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20270802T090000\r\nDTEND;TZID=Asia/Seoul:20270802T093000\r\nSUMMARY:[학점] 2027(하) K-MOOC 7학점 신청 (날짜 추정)\r\nDESCRIPTION:마지막 학기 · 잔여 7학점만 가볍게\\n\\n※ 아직\r\n  공고 전이라 날짜는 추정입니다. 공고로 확인하고 이 \r\n 일정을 고치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:2027(하) K-MOOC 7학점 신청\r\nEND:VALARM\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-12-01-a0fe41215aa3@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20271201T090000\r\nDTEND;TZID=Asia/Seoul:20271201T093000\r\nSUMMARY:[학점] 전기 학위신청 기간 확인 (날짜 추정)\r\nDESCRIPTION:12월~1월 · 최종 인정신청과 함께 진행\\n\\n※ 아\r\n 직 공고 전이라 날짜는 추정입니다. 공고로 확인하고 \r\n 이 일정을 고치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:전기 학위신청 기간 확인\r\nEND:VALARM\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2028-01-04-7485b2934ca9@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:221\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20280104T090000\r\nDTEND;TZID=Asia/Seoul:20280104T093000\r\nSUMMARY:[학점] 최종 인정신청 + 학위신청 마무리 (날짜 추\r\n 정)\r\nDESCRIPTION:140학점 완성 → 2028년 2월 공학사(컴퓨터공학) \r\n 학위 수여\\n\\n※ 아직 공고 전이라 날짜는 추정입니다. \r\n 공고로 확인하고 이 일정을 고치세요.\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\nDESCRIPTION:최종 인정신청 + 학위신청 마무리\r\nEND:VALARM\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-P7D\r\nDESCRIPTION:7일 뒤 — 최종 인정신청 + 학위신청 마무리\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n","지우기ics":"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//학점은행제 컴퓨터공학 로드맵//KO\r\nCALSCALE:GREGORIAN\r\nMETHOD:CANCEL\r\nX-WR-CALNAME:학점은행제 일정 (지우기)\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-08-10-1@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-08-17-1@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-08-17-2@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-08-18-1@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-08-18-3@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-09-06-1@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-09-06-3@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-09-06-4@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-09-13-1@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-09-13-5@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-11-23-1@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-11-23-4@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2026-11-23-6@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-01-04-1@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-01-04-5@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-01-04-6@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-01-04-7@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-01-04-8@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-01-11-1@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-01-11-7@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-01-11-9@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-02-01-10@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-02-01-1@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-02-01-8@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-04-01-11@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-04-01-1@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-04-01-9@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-04-19-10@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-04-19-12@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-04-19-1@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-07-01-11@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-07-01-13@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-07-01-1@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-08-02-12@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-08-02-14@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-08-02-1@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-12-01-13@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-12-01-15@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2027-12-01-1@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2028-01-04-14@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2028-01-04-16@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:hakjeom-2028-01-04-1@e-hakjeom.local\r\nORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local\r\nSEQUENCE:99999\r\nDTSTAMP:20260810T000000Z\r\nDTSTART;TZID=Asia/Seoul:20260810T000000\r\nSTATUS:CANCELLED\r\nSUMMARY:[학점] 지울 일정 — 남아 있으면 손으로 지우세\r\n 요\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n","지울건수":42,"현황":{"총필요":140,"보유":42,"이번학기":23,"교양필요":30,"교양확보예정":20,"전공필요":60,"전공계획":67,"비용":301000},"판":"1.5","변경이력":[{"판":"1.5","날짜":"2026-08-07","내용":["새 판이 나오면 **무엇이 바뀌었는지** 이 자리에 뜹니다.","일정에 **9월 1일 앱 배포**가 들어갔습니다 — 8월엔 배포 용량이 차서 미뤘습니다."]},{"판":"1.4","날짜":"2026-08-07","내용":["캘린더 없이 **앱이 직접 알림**을 울립니다 — 앱 정보에서 「알림 켜기」를 누르세요.","**예상 진행** — 신청하면 언제 얼마가 되는지 시점별로 보여줍니다.","졸업요건 막대가 3층이 됐습니다 — 지금 확보 / 신청한 것까지 / 계획대로면.","캘린더는 파일 넣기 대신 **주소 구독**으로 바꿨습니다. 넣을 때마다 중복이 생기던 것을 없앴습니다."]},{"판":"1.3","날짜":"2026-08-07","내용":["항목 상태를 네모 대신 **글자**로 — 인정됨 · 신청함 · 예정 · 취소할 것.","연결 상태를 **온라인/오프라인 둘 다** 보여줍니다. 온라인인데 계속 오프라인이라고 뜨던 것을 고쳤습니다.","**반도체공학Ⅰ**이 「취소할 것」으로 표시됩니다.","날짜 표기를 한글로 — D-3 → 3일 뒤, 08/10 → 8월 10일."]},{"판":"1.2","날짜":"2026-08-07","내용":["새 판이 나오면 **스스로 갱신**합니다. 버튼을 누를 필요가 없습니다.","앱 정보에 **버전**이 보입니다. 갱신됐는지 눈으로 확인할 수 있습니다."]},{"판":"1.1","날짜":"2026-08-07","내용":["일정을 **캘린더로 넘기는** 기능이 생겼습니다.","**2026(하)를 23학점으로 재설계** — 교양 20 + 전공 3. 독학사 한 과목이 떨어져도 안전해졌습니다."]},{"판":"1.0","날짜":"2026-08-07","내용":["첫 판 — 현황 · 항목 · 일정 세 화면. 항목을 눌러 상태를 바꾸면 졸업요건이 바로 갱신됩니다."]}],"인정순서":["지금","2027.1월","2027.7월","2028.1월"],"인정시점":{"컴퓨터시스템기사":"지금","K-MOOC 기이수분":"지금","빅데이터개론":"2027.1월","문화관광론":"2027.1월","실용한문":"2027.1월","현대인의정신건강":"2027.1월","커피학개론":"2027.1월","평생교육론":"2027.1월","인공지능":"2027.1월","효과적인성인교육방법":"2027.1월","정보처리기사":"2027.7월","네트워크관리사 2급":"2027.7월","독학사 2과정 2과목":"2027.7월","2027(상) K-MOOC 교양":"2027.7월","2027(상) K-MOOC 자유":"2027.7월","2027(하) K-MOOC":"2028.1월"},"버전":"260810.7494"};</script>
+<script>
+(function(){
+"use strict";
+var D=window.__HAKJEOM__, KEY="hakjeom-state-v1";
+var 순환=["예정","신청완료","인정완료"], 취소순환=["취소예정","취소완료"];
+var 표시={"예정":"예정","신청완료":"신청함","인정완료":"인정됨","취소예정":"취소할 것","취소완료":"취소함"};
+var 상태들={};
+try{ 상태들=JSON.parse(localStorage.getItem(KEY)||"{}"); }catch(e){ 상태들={}; }
+
+function st(it){ return 상태들[it.이름]||it.기본상태; }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(상태들)); }catch(e){} }
+/* 취소할 항목은 어떤 합계에도 넣지 않습니다 — 화면에는 보이되 학점에는 안 잡힙니다. */
+function 셈대상(i){ var s=st(i); return s!=="취소예정" && s!=="취소완료"; }
+function 합(f){ var s=0; D.항목.forEach(function(i){ if(셈대상(i)&&f(i)) s+=i.학점; }); return s; }
+function 남은(s){ var p=s.split("-"),t=new Date(+p[0],p[1]-1,+p[2]),n=new Date();
+  return Math.round((t-new Date(n.getFullYear(),n.getMonth(),n.getDate()))/864e5); }
+/* 화면에 보이는 글자는 전부 한글로 씁니다. D-3 같은 표기도 쓰지 않습니다.
+   고유명사 K-MOOC 만 남겨 둡니다 — 실제 신청 사이트에서 그 이름으로 찾아야 합니다. */
+function dd(d){ return d===0?"오늘":(d>0?d+"일 뒤":"지남"); }
+function 날짜한글(s){
+  var p=s.split("-"), 올해=new Date().getFullYear();
+  return (+p[0]===올해?"":p[0]+"년 ")+(+p[1])+"월 "+(+p[2])+"일";
+}
+function el(t,c,x){ var e=document.createElement(t); if(c)e.className=c; if(x!=null)e.textContent=x; return e; }
+function tap(){ try{ navigator.vibrate && navigator.vibrate(8); }catch(e){} }
+
+/* 캘린더로 바로 보내기 — 안드로이드 공유 시트에 파일을 얹습니다.
+   받은 파일을 찾아 누를 필요 없이 한 번에 캘린더 앱으로 넘어갑니다.
+   공유를 못 쓰는 브라우저(데스크톱 등)에서는 내려받기로 물러섭니다.
+   .ics 안에 알림(VALARM)이 들어 있어 공유로 넘겨도 알림이 따라갑니다. */
+async function 캘린더로보내기(내용, 파일이름){
+  try{
+    var f = new File([내용], 파일이름, { type: "text/calendar" });
+    if (navigator.canShare && navigator.canShare({ files: [f] })) {
+      await navigator.share({ files: [f], title: "학점은행제 일정" });
+      return "보냄";
+    }
+  }catch(e){
+    if (e && e.name === "AbortError") return "취소";
+  }
+  return 캘린더담기(내용, 파일이름) ? "받음" : "막힘";
+}
+function 결과말(r, 성공말){
+  return r === "보냄" ? 성공말
+       : r === "취소" ? "취소했습니다."
+       : r === "받음" ? "파일로 받았습니다. 그 파일을 열면 캘린더에 들어갑니다."
+       : "이 브라우저에서는 막혀 있습니다. 설치한 앱에서 눌러 주세요.";
+}
+
+/* 캘린더에 담기 — .ics 를 내려받으면 안드로이드가 캘린더 앱으로 넘겨줍니다.
+   앱은 스스로 울리지 못하지만, 캘린더는 울립니다. 알림은 캘린더에 맡기는 구조입니다.
+   .ics 내용은 파이썬(일정생성.py)이 만들어 심어 둔 것을 그대로 씁니다. */
+function 캘린더담기(내용, 파일이름){
+  try{
+    var url=URL.createObjectURL(new Blob([내용],{type:"text/calendar;charset=utf-8"}));
+    var a=document.createElement("a");
+    a.href=url; a.download=파일이름; a.style.display="none";
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ a.remove(); URL.revokeObjectURL(url); },10000);
+    return true;
+  }catch(e){ return false; }
+}
+
+var toast=document.getElementById("toast");
+function say(t){ toast.textContent=t; toast.classList.add("on");
+  clearTimeout(say._t); say._t=setTimeout(function(){ toast.classList.remove("on"); },1700); }
+
+/* ── 현황 ── */
+var v0=document.getElementById("v0");
+v0.innerHTML='<div class="card"><div class="hero"><span class="n" id="num">0</span>'+
+ '<span class="of">/ '+D.현황.총필요+' 학점</span><span class="tag">인정 완료</span></div>'+
+ '<div class="bar2"><i class="d" id="bd"></i><i class="g" id="bg"></i><i id="bt"></i></div>'+
+ '<div class="keys"></div></div><div class="reqs"></div>';
+var keys=v0.querySelector(".keys");
+[["kD","인정 완료","var(--done)"],["kG","신청 완료","var(--doing)"],["kT","남은 학점","var(--todo)"]]
+.forEach(function(k){ var s=el("span"),d=el("i","dot"); d.style.background=k[2];
+  s.appendChild(d); s.appendChild(document.createTextNode(k[1]+" "));
+  var b=el("b"); b.id=k[0]; s.appendChild(b); keys.appendChild(s); });
+var reqs=v0.querySelector(".reqs");
+[["r0","총 학점",""],["r1","전공","자격 3개 + 독학사 2과목이면 64로 채워집니다"],
+ ["r2","교양","호환과목 3개를 인정신청 때 '교양'으로 지정해야 합니다 (9학점)"]]
+.forEach(function(r){ var b=el("div","req"); b.id=r[0];
+  var h=el("div","h"); h.appendChild(el("span",null,r[1])); h.appendChild(el("b")); b.appendChild(h);
+  var t=el("div","track");
+  t.appendChild(el("i")); t.appendChild(el("i","g")); t.appendChild(el("i","p"));
+  b.appendChild(t);
+  b.appendChild(el("div","now"));
+  if(r[2]) b.appendChild(el("div","note",r[2])); reqs.appendChild(b); });
+
+var 가까운=D.일정.map(function(s){return {s:s,d:남은(s.날짜)};})
+  .filter(function(x){return x.d>=-1;}).sort(function(a,b){return a.d-b.d;});
+if(가까운.length){
+  v0.appendChild(el("h2",null,"다음 할 일"));
+  var x=가까운[0],n=el("div","next");
+  n.appendChild(el("div","d",dd(x.d)+" · "+날짜한글(x.s.날짜)));
+  n.appendChild(el("div","t",x.s.제목+(x.s.확정?"":"  (날짜 추정)")));
+  n.appendChild(el("div","b",x.s.본문));
+  v0.appendChild(n);
+}
+/* 예상 진행 — 계획대로 갔을 때 언제 얼마가 되는지.
+   학점인정 신청이 1·4·7·10월에만 되므로 시점이 뚝뚝 끊깁니다. */
+v0.appendChild(el("h2",null,"예상 진행 (계획대로 갔을 때)"));
+var 예상=el("div","card");
+(function(){
+  var tb=document.createElement("table"); tb.className="fore";
+  tb.innerHTML="<tr><th>시점</th><th>이번</th><th>누적</th><th>전공</th><th>교양</th></tr>";
+  var 누적=0, 전=0, 교=0;
+  D.인정순서.forEach(function(시,idx){
+    var 이번=D.항목.filter(function(i){
+      return i.기본상태!=="취소예정" && D.인정시점[i.이름]===시; });
+    var c=이번.reduce(function(s,i){return s+i.학점;},0);
+    누적+=c;
+    전+=이번.filter(function(i){return i.구분==="전공";}).reduce(function(s,i){return s+i.학점;},0);
+    교+=이번.filter(function(i){return i.구분==="교양";}).reduce(function(s,i){return s+i.학점;},0);
+    var tr=document.createElement("tr");
+    if(idx===D.인정순서.length-1) tr.className="fin";
+    tr.innerHTML="<td>"+시+"</td><td class='plus'>"+(idx?"+"+c:"—")+"</td>"+
+                 "<td><b>"+누적+"</b></td><td>"+전+"</td><td>"+교+"</td>";
+    tb.appendChild(tr);
+  });
+  예상.appendChild(tb);
+  예상.appendChild(el("div","mini",
+    "학점인정 신청은 1·4·7·10월에만 됩니다. 그래서 수강이 끝나도 그 달까지는 숫자가 안 움직입니다.\n"+
+    "전공 60 · 교양 30 을 넘기는 시점이 둘 다 2027.7월입니다."));
+})();
+v0.appendChild(예상);
+
+/* 바뀐 내용 — 판이 올라가면 자동으로 펼쳐 보여줍니다. */
+(function(){
+  var 마지막;
+  try{ 마지막 = localStorage.getItem("hakjeom-본판"); }catch(e){}
+  var 새판 = (마지막 !== null && 마지막 !== D.판);
+  v0.appendChild(el("h2",null, 새판 ? "새 판으로 바뀌었습니다" : "바뀐 내용"));
+  var 카드=el("div","card notes" + (새판 ? " fresh" : ""));
+  var 머리=el("button","nhead"); 머리.type="button";
+  머리.innerHTML = "<span>판 " + D.판 + "</span><span class='nx'>" +
+                   (새판 ? "이번에 바뀐 것" : "펼치기") + "</span>";
+  var 몸=el("div","nbody"); 몸.hidden = !새판;
+  D.변경이력.forEach(function(v, i){
+    var 묶음=el("div","nver");
+    묶음.appendChild(el("div","nv","판 " + v.판 + " · " + v.날짜 + (i===0 ? "  (지금)" : "")));
+    var ul=document.createElement("ul");
+    v.내용.forEach(function(c){
+      var li=document.createElement("li");
+      li.innerHTML = c.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+      ul.appendChild(li);
+    });
+    묶음.appendChild(ul);
+    몸.appendChild(묶음);
+  });
+  머리.addEventListener("click",function(){
+    tap(); 몸.hidden = !몸.hidden;
+    머리.querySelector(".nx").textContent = 몸.hidden ? "펼치기" : "접기";
+    카드.classList.remove("fresh");
+  });
+  카드.appendChild(머리); 카드.appendChild(몸);
+  v0.appendChild(카드);
+  try{ localStorage.setItem("hakjeom-본판", D.판); }catch(e){}
+})();
+
+v0.appendChild(el("h2",null,"앱 정보"));
+var info=el("div","card");
+var 판=el("div","ver");
+판.appendChild(el("span",null,"버전"));
+판.appendChild(el("b",null,D.판 + "  (" + D.버전 + ")"));
+info.appendChild(판);
+info.appendChild(el("div","mini",
+ "상태는 이 기기에만 저장됩니다.\n"+
+ "알림을 켜면 캘린더 없이도 이 앱이 신청일·마감일에 알려줍니다.\n"+
+ "다만 크롬이 앱을 깨우는 시점은 보장되지 않아, 회사 PC 알림(평일 9시)이 더 확실합니다."));
+/* 알림 — 캘린더 없이 앱이 직접 울립니다.
+   설치된 앱에서 크롬이 주기적으로 깨워 주면(Periodic Background Sync) 날짜를 보고 알립니다.
+   앱을 열 때도 검사합니다. 크롬이 언제 깨울지는 보장되지 않으므로 회사 PC 알림이 더 확실합니다. */
+var 알림칸=el("div","noti");
+var 알림상태=el("div","ns");
+var 알림켜기=el("button","ghost","알림 켜기");
+알림칸.appendChild(알림상태); 알림칸.appendChild(알림켜기);
+info.appendChild(알림칸);
+
+function 알림표시(){
+  var p = (typeof Notification!=="undefined") ? Notification.permission : "unsupported";
+  if(p==="granted"){ 알림상태.textContent="알림 켜져 있습니다 — 신청일·마감일에 폰이 알려줍니다."; 알림켜기.textContent="지금 한 번 시험"; }
+  else if(p==="denied"){ 알림상태.textContent="알림이 차단돼 있습니다. 폰 설정 → 앱 → 알림에서 켜 주세요."; 알림켜기.hidden=true; }
+  else if(p==="unsupported"){ 알림상태.textContent="이 브라우저는 알림을 지원하지 않습니다."; 알림켜기.hidden=true; }
+  else { 알림상태.textContent="알림이 꺼져 있습니다. 켜면 캘린더 없이도 폰이 알려줍니다."; 알림켜기.textContent="알림 켜기"; }
+}
+알림표시();
+
+알림켜기.addEventListener("click", async function(){
+  tap();
+  try{
+    if(Notification.permission!=="granted"){
+      var p = await Notification.requestPermission();
+      알림표시();
+      if(p!=="granted"){ say("알림을 켜지 않았습니다."); return; }
+    }
+    var reg = await navigator.serviceWorker.ready;
+    // 크롬이 주기적으로 깨우도록 등록 (설치된 앱에서만 허용됩니다)
+    var 주기 = "안 됨";
+    try{
+      if("periodicSync" in reg){
+        var st = await navigator.permissions.query({name:"periodic-background-sync"});
+        if(st.state==="granted"){
+          await reg.periodicSync.register("학점점검",{minInterval:24*60*60*1000});
+          주기 = "등록됨";
+        } else { 주기 = "권한 없음(설치한 앱에서만 됩니다)"; }
+      }
+    }catch(e){ 주기 = "안 됨"; }
+    reg.active && reg.active.postMessage({type:"알림검사", 강제:true});
+    say("알림을 켰습니다. 주기 확인: " + 주기 + " · 앱을 열 때도 검사합니다.");
+  }catch(e){ say("알림을 켜지 못했습니다: " + e.message); }
+});
+
+var rst=el("button","ghost","눌러서 바꾼 상태 초기화");
+rst.addEventListener("click",function(){
+  if(!confirm("바꾼 상태를 모두 처음 값으로 되돌립니다. 계속할까요?")) return;
+  상태들={}; save(); 항목그리기(); 갱신();
+
+/* 앱을 열 때마다 알릴 게 있는지 검사합니다(하루 한 번만 울립니다) */
+if("serviceWorker" in navigator && typeof Notification!=="undefined" && Notification.permission==="granted"){
+  navigator.serviceWorker.ready.then(function(reg){
+    reg.active && reg.active.postMessage({type:"알림검사", 강제:false});
+  });
+} say("처음 값으로 되돌렸습니다");
+});
+info.appendChild(rst);
+v0.appendChild(info);
+
+/* ── 항목 ── */
+var v1=document.getElementById("v1"), 필터="전체";
+v1.innerHTML='<div class="chips"></div><div class="list" id="list"></div>'+
+ '<div class="mini" id="sum" style="margin-top:12px;padding:0 4px"></div>';
+["전체","전공","교양","일반"].forEach(function(f){
+  var b=el("button","fchip",f); b.type="button"; b.setAttribute("aria-pressed",f===필터);
+  b.addEventListener("click",function(){ 필터=f; tap();
+    v1.querySelectorAll(".fchip").forEach(function(o){ o.setAttribute("aria-pressed",o.textContent===f); });
+    거르기(); });
+  v1.querySelector(".chips").appendChild(b);
+});
+var list=document.getElementById("list");
+function 항목그리기(){
+  list.textContent="";
+  D.항목.forEach(function(it){
+    var b=el("button","item"); b.type="button"; b.setAttribute("data-s",st(it)); b.dataset.g=it.구분;
+    var m=el("span","mark",표시[st(it)]); b.appendChild(m);
+    var nm=el("span","nm"), n1=el("span","n1");
+    n1.appendChild(document.createTextNode(it.이름));
+    n1.appendChild(el("span","chip c-"+it.구분,it.구분));
+    if(it.호환) n1.appendChild(el("span","hoh","교양 지정"));
+    nm.appendChild(n1);
+    nm.appendChild(el("span","n2",it.시점+(it.메모?" · "+it.메모:"")));
+    b.appendChild(nm); b.appendChild(el("span","cr",it.학점));
+    b.addEventListener("click",function(){
+      var 고리 = (it.기본상태==="취소예정") ? 취소순환 : 순환;
+      var cur=st(it), nx=고리[(고리.indexOf(cur)+1)%고리.length];
+      상태들[it.이름]=nx; save(); tap();
+      b.setAttribute("data-s",nx); m.textContent=표시[nx];
+      갱신(); say(it.이름+" → "+nx);
+    });
+    list.appendChild(b);
+  });
+  거르기();
+}
+function 거르기(){
+  list.querySelectorAll(".item").forEach(function(b){
+    b.hidden = !(필터==="전체" || b.dataset.g===필터);
+  });
+}
+
+/* ── 일정 ── */
+var v2=document.getElementById("v2");
+v2.innerHTML='<div class="subs"><div class="st">캘린더에 붙이는 가장 좋은 방법</div>'+
+ '<p>아래 주소를 캘린더에 <b>구독</b>으로 넣으면 파일을 넣을 필요가 없고, 일정이 바뀌어도 '+
+ '알아서 따라오며 <b>중복이 생기지 않습니다.</b></p>'+
+ '<code id="subsurl"></code>'+
+ '<button class="calbig" id="copyurl" type="button">주소 복사</button>'+
+ '<p class="how">PC에서 <b>calendar.google.com</b> → 왼쪽 「다른 캘린더 +」 → <b>URL로 추가</b> → 붙여넣기.<br>'+
+ '한 번만 하면 폰 캘린더에도 같이 뜹니다.</p></div>'+
+ '<div class="sch"></div><div class="mini" style="margin-top:12px;padding:0 4px">'+
+ '<b>파일로 넣는 방법은 권하지 않습니다.</b> 캘린더 앱이 같은 일정을 알아보지 못해 '+
+ '누를 때마다 하나씩 더 생깁니다. 이미 쌓였다면 <b>도구\캘린더정리.js</b> 로 한 번에 지우세요.<br><br>'+
+ '2027년 날짜는 아직 공고 전이라 추정입니다. 공고가 나오면 확정 날짜로 갱신됩니다.</div>';
+
+(function(){
+  var base = location.origin + location.pathname.replace(/[^/]*$/, "");
+  var url = base + "hakjeom.ics";
+  document.getElementById("subsurl").textContent = url;
+  document.getElementById("copyurl").addEventListener("click", async function(){
+    tap();
+    try{
+      await navigator.clipboard.writeText(url);
+      say("주소를 복사했습니다. PC 구글캘린더에서 「URL로 추가」에 붙여넣으세요.");
+    }catch(e){
+      var ta=document.createElement("textarea"); ta.value=url;
+      ta.style.cssText="position:fixed;left:-9999px"; document.body.appendChild(ta);
+      ta.select();
+      say(document.execCommand("copy") ? "주소를 복사했습니다." : "복사가 막혔습니다. 주소를 길게 눌러 직접 복사하세요.");
+      ta.remove();
+    }
+  });
+})();
+
+var sch=v2.querySelector(".sch");
+D.일정.forEach(function(s){
+  var d=남은(s.날짜);
+  var b=el("button","srow"+(d<0?" past":(d<=14?" soon":""))); b.type="button";
+  b.setAttribute("aria-expanded","false");
+  b.appendChild(el("span","dd",dd(d)));
+  var stx=el("span","st");
+  stx.appendChild(document.createTextNode(날짜한글(s.날짜)+"  "+s.제목));
+  if(!s.확정) stx.appendChild(el("span","guess","날짜 추정 — 공고로 확인 필요"));
+  var 본문=el("span","body");
+  본문.appendChild(document.createTextNode(s.본문));
+  var 하나=el("button","calone","이 일정만 캘린더로 보내기");
+  하나.type="button";
+  하나.addEventListener("click", async function(ev){
+    ev.stopPropagation(); tap();
+    var r = await 캘린더로보내기(s.ics, "학점_"+s.제목.replace(/[^가-힣0-9]/g,"")+".ics");
+    say(결과말(r, "캘린더로 보냈습니다."));
+  });
+  본문.appendChild(document.createElement("br"));
+  본문.appendChild(하나);
+  stx.appendChild(본문);
+  b.appendChild(stx);
+  b.addEventListener("click",function(){
+    var o=b.getAttribute("aria-expanded")==="true";
+    b.setAttribute("aria-expanded",!o); tap();
+  });
+  sch.appendChild(b);
+});
+
+/* ── 갱신 ── */
+function 갱신(){
+  var 확보=합(function(i){return st(i)==="인정완료";});
+  var 진행=합(function(i){return st(i)==="신청완료";});
+  var 총=D.현황.총필요, 남음=Math.max(0,총-확보-진행);
+  document.getElementById("num").textContent=확보;
+  document.getElementById("bd").style.flexGrow=확보;
+  document.getElementById("bg").style.flexGrow=진행;
+  document.getElementById("bt").style.flexGrow=남음;
+  document.getElementById("kD").textContent=확보;
+  document.getElementById("kG").textContent=진행;
+  document.getElementById("kT").textContent=남음;
+  /* 각 요건을 3층으로: 확보(인정됨) · 신청하면 · 계획대로 가면 */
+  var 갈래=function(f){ return {
+    확보: 합(function(i){ return f(i)&&st(i)==="인정완료"; }),
+    신청: 합(function(i){ return f(i)&&st(i)==="신청완료"; }),
+    계획: 합(f)
+  }; };
+  [["r0",function(){return true;},총,false],
+   ["r1",function(i){return i.구분==="전공";},D.현황.전공필요,false],
+   ["r2",function(i){return i.구분==="교양";},D.현황.교양필요,true]]
+  .forEach(function(r){
+    var box=document.getElementById(r[0]), v=갈래(r[1]), 필요=r[2];
+    var 바=Math.max(필요,v.계획);
+    box.querySelector("b").textContent=v.확보+" / "+필요;
+    var i=box.querySelectorAll(".track i");
+    i[0].style.flexGrow=v.확보;
+    i[1].style.flexGrow=v.신청;
+    i[2].style.flexGrow=Math.max(0,v.계획-v.확보-v.신청);
+    box.querySelector(".track").style.setProperty("--rest",Math.max(0,바-v.계획));
+    box.querySelector(".now").innerHTML =
+      "지금 <b>"+v.확보+"</b>  ·  신청한 것까지 <b>"+(v.확보+v.신청)+"</b>  ·  계획대로면 <b>"+v.계획+"</b>";
+    box.classList.toggle("met",v.확보>=필요);
+    box.classList.toggle("short",r[3]&&v.계획<필요);
+  });
+  var 임박=가까운.filter(function(x){return x.d>=0&&x.d<=7;}).length;
+  try{ 임박?navigator.setAppBadge&&navigator.setAppBadge(임박):navigator.clearAppBadge&&navigator.clearAppBadge(); }catch(e){}
+  var s=document.getElementById("sum");
+  if(s) s.textContent="인정 완료 "+확보+"학점 · 신청 완료 "+진행+"학점 · 남은 "+남음+"학점";
+}
+
+/* ── 탭 ── */
+document.querySelectorAll("nav button").forEach(function(b){
+  b.addEventListener("click",function(){
+    tap();
+    document.querySelectorAll("nav button").forEach(function(o){ o.setAttribute("aria-selected",o===b); });
+    document.querySelectorAll(".view").forEach(function(v,i){ v.classList.toggle("on",i===+b.dataset.v); });
+    window.scrollTo({top:0,behavior:"instant"});
+  });
+});
+
+/* ── 설치 · 온라인 ── */
+var 설치이벤트=null, 설치버튼=document.getElementById("install");
+window.addEventListener("beforeinstallprompt",function(e){
+  e.preventDefault(); 설치이벤트=e; 설치버튼.hidden=false;
+});
+설치버튼.addEventListener("click",function(){
+  if(!설치이벤트) return;
+  설치이벤트.prompt();
+  설치이벤트.userChoice.then(function(r){
+    설치버튼.hidden=true; 설치이벤트=null;
+    say(r.outcome==="accepted"?"설치했습니다. 홈 화면에서 여세요.":"설치를 취소했습니다.");
+  });
+});
+window.addEventListener("appinstalled",function(){ 설치버튼.hidden=true; say("설치 완료"); });
+function 연결(){
+  var on=navigator.onLine;
+  document.getElementById("net").classList.toggle("off",!on);
+  document.getElementById("nt").textContent = on ? "온라인" : "오프라인";
+}
+window.addEventListener("online",연결); window.addEventListener("offline",연결); 연결();
+
+항목그리기(); 갱신();
+})();
+</script>
+<script>
+/* 자동 갱신 — 손댈 것이 없습니다.
+   앱을 열거나 화면으로 되돌아올 때마다 새 판이 있는지 확인하고, 있으면 받아서
+   스스로 한 번 새로고침합니다. 눌러 둔 상태는 기기에 저장돼 있어 그대로 남습니다. */
+if("serviceWorker" in navigator){
+  var 갱신중=false;
+  navigator.serviceWorker.addEventListener("controllerchange",function(){
+    if(갱신중) return; 갱신중=true;
+    try{ sessionStorage.setItem("갱신됨","1"); }catch(e){}
+    location.reload();
+  });
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.register("./sw.js").then(function(reg){
+      // 앱으로 돌아올 때마다 새 판 확인
+      document.addEventListener("visibilitychange",function(){
+        if(!document.hidden) reg.update();
+      });
+      setInterval(function(){ reg.update(); }, 60*60*1000);
+    }).catch(function(e){ console.warn("서비스워커 등록 실패:",e); });
+
+    try{
+      if(sessionStorage.getItem("갱신됨")){
+        sessionStorage.removeItem("갱신됨");
+        var t=document.getElementById("toast");
+        t.textContent="새 버전으로 갱신됐습니다 ("+window.__HAKJEOM__.버전+")";
+        t.classList.add("on");
+        setTimeout(function(){ t.classList.remove("on"); },2600);
+      }
+    }catch(e){}
+  });
+}
+</script>
+</body>
+</html>
