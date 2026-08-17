@@ -146,27 +146,27 @@ END:VEVENT
 BEGIN:VEVENT
 UID:hakjeom-2026-09-01-69dfcba71b29@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
-SEQUENCE:221
-DTSTAMP:20260810T000000Z
+SEQUENCE:222
+DTSTAMP:20260817T000000Z
 DTSTART;TZID=Asia/Seoul:20260901T090000
 DTEND;TZID=Asia/Seoul:20260901T093000
-SUMMARY:[학점] 학점 관리 앱 판 1.4 배포하기
-DESCRIPTION:8월에 Netlify 용량이 차서 못 올렸습니다. 달이 
- 바뀌었으니 지금 올리세요.\n산출물\\학점관리앱_PWA.zip
-  을 기존 사이트의 Deploys 탭에 끌어다 놓을 것\n(새로 
- 드롭하면 새 사이트가 생겨 설치된 앱과 끊어집니다)\n
- 올린 뒤 앱에서 「알림 켜기」를 한 번 누르면 폰 알림
- 이 켜집니다.\n★ 그전까지 폰 앱의 숫자는 옛 계획(20
- 학점)입니다 — 실제는 23학점입니다.
+SUMMARY:[학점] 깃허브 페이지 배포 확인
+DESCRIPTION:이제 Netlify 대신 깃허브 페이지를 씁니다 — 저
+ 장소에 올리면 바로 반영되어 따로 배포할 일이 없습니
+ 다.\n주소: https://kaya1914-blip.github.io/hakjeom/\n오늘은 확인
+ 만 하면 됩니다 — 폰에서 위 주소를 열어 앱 정보의 판
+ 이 1.6인지 보고\n「알림 켜기」를 한 번 눌러 두세요.\n
+ ★ 주소가 바뀌었으므로 폰에 깔려 있던 옛 앱(Netlify)은 
+ 지우고 새로 설치해야 합니다.
 BEGIN:VALARM
 ACTION:DISPLAY
 TRIGGER:PT0S
-DESCRIPTION:학점 관리 앱 판 1.4 배포하기
+DESCRIPTION:깃허브 페이지 배포 확인
 END:VALARM
 BEGIN:VALARM
 ACTION:DISPLAY
 TRIGGER:-P1D
-DESCRIPTION:1일 뒤 — 학점 관리 앱 판 1.4 배포하기
+DESCRIPTION:1일 뒤 — 깃허브 페이지 배포 확인
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
