@@ -17,8 +17,8 @@ END:VTIMEZONE
 BEGIN:VEVENT
 UID:hakjeom-2026-08-10-43a9e6d6bf5b@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
-SEQUENCE:221
-DTSTAMP:20260810T000000Z
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
 DTSTART;TZID=Asia/Seoul:20260810T090000
 DTEND;TZID=Asia/Seoul:20260810T093000
 SUMMARY:[학점] 실용한문 · 현대인의정신건강 신청 + 반도
@@ -45,8 +45,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:hakjeom-2026-08-17-7ce37824b335@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
-SEQUENCE:221
-DTSTAMP:20260810T000000Z
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
 DTSTART;TZID=Asia/Seoul:20260817T090000
 DTEND;TZID=Asia/Seoul:20260817T093000
 SUMMARY:[학점] 커피학개론 · 평생교육론 · 인공지능 신
@@ -72,8 +72,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:hakjeom-2026-08-18-75ff5e12de62@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
-SEQUENCE:221
-DTSTAMP:20260810T000000Z
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
 DTSTART;TZID=Asia/Seoul:20260818T090000
 DTEND;TZID=Asia/Seoul:20260818T093000
 SUMMARY:[학점] 효과적인성인교육방법 신청 시작
@@ -94,8 +94,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:hakjeom-2026-09-06-2e1373f2f6f2@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
-SEQUENCE:221
-DTSTAMP:20260810T000000Z
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
 DTSTART;TZID=Asia/Seoul:20260906T090000
 DTEND;TZID=Asia/Seoul:20260906T093000
 SUMMARY:[학점] 성신여대 · 남서울대 마감
@@ -120,8 +120,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:hakjeom-2026-09-13-00e27c28e3e2@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
-SEQUENCE:221
-DTSTAMP:20260810T000000Z
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
 DTSTART;TZID=Asia/Seoul:20260913T090000
 DTEND;TZID=Asia/Seoul:20260913T093000
 SUMMARY:[학점] 한동대 · 건양사이버대 마감
@@ -144,20 +144,210 @@ DESCRIPTION:1일 뒤 — 한동대 · 건양사이버대 마감
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
-UID:hakjeom-2026-09-01-69dfcba71b29@e-hakjeom.local
+UID:hakjeom-2026-09-28-01cb524c35ce@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
-SEQUENCE:222
-DTSTAMP:20260817T000000Z
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
+DTSTART;TZID=Asia/Seoul:20260928T090000
+DTEND;TZID=Asia/Seoul:20260928T093000
+SUMMARY:[학점] 문화관광론 토론 시작
+DESCRIPTION:인하공전 문화관광론 7주차 토론 (9/28~) · 참여
+  실적으로 채점 (10점)\n토론방에 주제 글 등록 · 단답
+ 형/복붙은 실적 제외
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:문화관광론 토론 시작
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:1일 뒤 — 문화관광론 토론 시작
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2026-10-11-48ced3897d99@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
+DTSTART;TZID=Asia/Seoul:20261011T090000
+DTEND;TZID=Asia/Seoul:20261011T093000
+SUMMARY:[학점] 빅데이터 · 문화관광 중간고사 마감
+DESCRIPTION:인하공전 2과목 중간고사 10/5~10/11 — 오늘까지
+ \n빅데이터개론 20점 · 문화관광론 20점
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:빅데이터 · 문화관광 중간고사 마감
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P3D
+DESCRIPTION:3일 뒤 — 빅데이터 · 문화관광 중간고사 마감
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:1일 뒤 — 빅데이터 · 문화관광 중간고사 마감
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2026-10-25-a004812169ee@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
+DTSTART;TZID=Asia/Seoul:20261025T090000
+DTEND;TZID=Asia/Seoul:20261025T093000
+SUMMARY:[학점] 빅데이터 · 문화관광 레포트 마감
+DESCRIPTION:인하공전 2과목 9주차 레포트 10/12~10/25 — 오늘
+ 까지 (파일 업로드)\n빅데이터: 사례분석 · 문화관광: 
+ 성공한 문화관광상품 사례분석
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:빅데이터 · 문화관광 레포트 마감
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P3D
+DESCRIPTION:3일 뒤 — 빅데이터 · 문화관광 레포트 마감
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:1일 뒤 — 빅데이터 · 문화관광 레포트 마감
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2026-11-29-c9e8d8658a20@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
+DTSTART;TZID=Asia/Seoul:20261129T090000
+DTEND;TZID=Asia/Seoul:20261129T093000
+SUMMARY:[학점] 빅데이터 · 문화관광 종강 (기말 마감)
+DESCRIPTION:인하공전 2과목 수강 종료 · 오늘까지\n빅데이
+ 터개론 기말고사 · 문화관광론 기획서 제출(기말 30점)
+ \n미이수(진도·퀴즈) 없는지 확인 · 최종성적은 종강 
+ 후 최대 4주 뒤 확정
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:빅데이터 · 문화관광 종강 (기말 마감)
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P3D
+DESCRIPTION:3일 뒤 — 빅데이터 · 문화관광 종강 (기말 마
+ 감)
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:1일 뒤 — 빅데이터 · 문화관광 종강 (기말 마
+ 감)
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2026-12-11-6e36e4a50dfe@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
+DTSTART;TZID=Asia/Seoul:20261211T090000
+DTEND;TZID=Asia/Seoul:20261211T093000
+SUMMARY:[학점] 실용한문 · 현대인의정신건강 종강
+DESCRIPTION:성신여대 2과목 수강 종료 · 오늘까지\n진도·
+ 퀴즈·중간/기말 다 마쳤는지 확인
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:실용한문 · 현대인의정신건강 종강
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P3D
+DESCRIPTION:3일 뒤 — 실용한문 · 현대인의정신건강 종강
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:1일 뒤 — 실용한문 · 현대인의정신건강 종강
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2026-12-13-33f299950f39@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
+DTSTART;TZID=Asia/Seoul:20261213T090000
+DTEND;TZID=Asia/Seoul:20261213T093000
+SUMMARY:[학점] 인공지능 · 효과적인성인교육방법 종강
+DESCRIPTION:한동대 · 건양사이버 2과목 수강 종료 · 오늘
+ 까지\n미이수 없는지 확인
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:인공지능 · 효과적인성인교육방법 종강
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P3D
+DESCRIPTION:3일 뒤 — 인공지능 · 효과적인성인교육방법 
+ 종강
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:1일 뒤 — 인공지능 · 효과적인성인교육방법 
+ 종강
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2026-12-20-5b04b03e1e13@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
+DTSTART;TZID=Asia/Seoul:20261220T090000
+DTEND;TZID=Asia/Seoul:20261220T093000
+SUMMARY:[학점] 커피학개론 · 평생교육론 종강 (2026 하반
+ 기 끝)
+DESCRIPTION:남서울대 2과목 수강 종료 · 오늘까지 → 2026(
+ 하) 8과목 전부 종료\n다음: 2027.1월 등록월에 23학점 인
+ 정신청 (호환과목 3개 교양 지정 잊지 말 것)
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:커피학개론 · 평생교육론 종강 (2026 하반기 끝
+ )
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P3D
+DESCRIPTION:3일 뒤 — 커피학개론 · 평생교육론 종강 (2026 
+ 하반기 끝)
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:1일 뒤 — 커피학개론 · 평생교육론 종강 (2026 
+ 하반기 끝)
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2026-09-01-9786bee5135a@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
 DTSTART;TZID=Asia/Seoul:20260901T090000
 DTEND;TZID=Asia/Seoul:20260901T093000
 SUMMARY:[학점] 깃허브 페이지 배포 확인
-DESCRIPTION:이제 Netlify 대신 깃허브 페이지를 씁니다 — 저
- 장소에 올리면 바로 반영되어 따로 배포할 일이 없습니
- 다.\n주소: https://kaya1914-blip.github.io/hakjeom/\n오늘은 확인
- 만 하면 됩니다 — 폰에서 위 주소를 열어 앱 정보의 판
- 이 1.6인지 보고\n「알림 켜기」를 한 번 눌러 두세요.\n
- ★ 주소가 바뀌었으므로 폰에 깔려 있던 옛 앱(Netlify)은 
- 지우고 새로 설치해야 합니다.
+DESCRIPTION:이제 Netlify 대신 깃허브 페이지를 씁니다 — 
+ 저장소에 올리면 바로 반영되어 따로 배포할 일이 없
+ 습니다.\n주소: https://kaya1914-blip.github.io/hakjeom/\n오늘은 
+ 확인만 하면 됩니다 — 폰에서 위 주소를 열어 앱 정보
+ 의 판이 1.6인지 보고\n「알림 켜기」를 한 번 눌러 두
+ 세요.\n★ 주소가 바뀌었으므로 폰에 깔려 있던 옛 앱(N
+ etlify)은 지우고 새로 설치해야 합니다.
 BEGIN:VALARM
 ACTION:DISPLAY
 TRIGGER:PT0S
@@ -172,12 +362,14 @@ END:VEVENT
 BEGIN:VEVENT
 UID:hakjeom-2026-11-23-1f5135fb3462@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
-SEQUENCE:221
-DTSTAMP:20260810T000000Z
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
 DTSTART;TZID=Asia/Seoul:20261123T090000
 DTEND;TZID=Asia/Seoul:20261123T093000
 SUMMARY:[학점] 2026(하) K-MOOC 종강 임박
-DESCRIPTION:11/29 종강 · 미이수 강의가 없는지 확인
+DESCRIPTION:종강일: 인하 11/29 · 성신 12/11 · 한동/건양 12/1
+ 3 · 남서울 12/20\n과목별 미이수(진도·퀴즈·시험) 없는
+ 지 지금부터 확인
 BEGIN:VALARM
 ACTION:DISPLAY
 TRIGGER:PT0S
@@ -187,8 +379,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:hakjeom-2027-01-04-15afcc2b5052@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
-SEQUENCE:221
-DTSTAMP:20260810T000000Z
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
 DTSTART;TZID=Asia/Seoul:20270104T090000
 DTEND;TZID=Asia/Seoul:20270104T093000
 SUMMARY:[학점] 1월 등록월 — 23학점 인정신청 (날짜 추정)
@@ -211,8 +403,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:hakjeom-2027-01-04-143312031f2d@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
-SEQUENCE:221
-DTSTAMP:20260810T000000Z
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
 DTSTART;TZID=Asia/Seoul:20270104T090000
 DTEND;TZID=Asia/Seoul:20270104T093000
 SUMMARY:[학점] 2027년 일정 공고로 확정하기 (날짜 추정)
@@ -230,8 +422,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:hakjeom-2027-01-11-46c46eff947d@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
-SEQUENCE:221
-DTSTAMP:20260810T000000Z
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
 DTSTART;TZID=Asia/Seoul:20270111T090000
 DTEND;TZID=Asia/Seoul:20270111T093000
 SUMMARY:[학점] 정보처리기사 1회 필기 접수 (날짜 추정)
@@ -253,8 +445,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:hakjeom-2027-02-01-3d4552054ca3@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
-SEQUENCE:221
-DTSTAMP:20260810T000000Z
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
 DTSTART;TZID=Asia/Seoul:20270201T090000
 DTEND;TZID=Asia/Seoul:20270201T093000
 SUMMARY:[학점] 2027(상) K-MOOC 개설목록 확인 (날짜 추정)
@@ -272,8 +464,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:hakjeom-2027-04-01-1a4f34a88705@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
-SEQUENCE:221
-DTSTAMP:20260810T000000Z
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
 DTSTART;TZID=Asia/Seoul:20270401T090000
 DTEND;TZID=Asia/Seoul:20270401T093000
 SUMMARY:[학점] 독학사 2과정 접수 공고 확인 (날짜 추정)
@@ -290,8 +482,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:hakjeom-2027-04-19-f39b832bb24a@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
-SEQUENCE:221
-DTSTAMP:20260810T000000Z
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
 DTSTART;TZID=Asia/Seoul:20270419T090000
 DTEND;TZID=Asia/Seoul:20270419T093000
 SUMMARY:[학점] 독학사 2과정 2과목 접수 주간 (날짜 추정)
@@ -320,8 +512,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:hakjeom-2027-07-01-256332c9cf65@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
-SEQUENCE:221
-DTSTAMP:20260810T000000Z
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
 DTSTART;TZID=Asia/Seoul:20270701T090000
 DTEND;TZID=Asia/Seoul:20270701T093000
 SUMMARY:[학점] 7월 등록월 — 68학점 일괄 인정신청 (날짜 
@@ -345,8 +537,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:hakjeom-2027-08-02-2624a66c301b@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
-SEQUENCE:221
-DTSTAMP:20260810T000000Z
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
 DTSTART;TZID=Asia/Seoul:20270802T090000
 DTEND;TZID=Asia/Seoul:20270802T093000
 SUMMARY:[학점] 2027(하) K-MOOC 7학점 신청 (날짜 추정)
@@ -362,8 +554,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:hakjeom-2027-12-01-a0fe41215aa3@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
-SEQUENCE:221
-DTSTAMP:20260810T000000Z
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
 DTSTART;TZID=Asia/Seoul:20271201T090000
 DTEND;TZID=Asia/Seoul:20271201T093000
 SUMMARY:[학점] 전기 학위신청 기간 확인 (날짜 추정)
@@ -379,8 +571,8 @@ END:VEVENT
 BEGIN:VEVENT
 UID:hakjeom-2028-01-04-7485b2934ca9@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
-SEQUENCE:221
-DTSTAMP:20260810T000000Z
+SEQUENCE:230
+DTSTAMP:20260819T000000Z
 DTSTART;TZID=Asia/Seoul:20280104T090000
 DTEND;TZID=Asia/Seoul:20280104T093000
 SUMMARY:[학점] 최종 인정신청 + 학위신청 마무리 (날짜 추
