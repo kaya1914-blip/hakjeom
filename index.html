@@ -389,6 +389,10 @@ function 진도토글(과목,i){ var k=과목+"|"+i; if(진도[k]) delete 진도
 function 퀴즈완료(과목,i){ return !!진도[과목+"|"+i+"|q"]; }
 function 퀴즈토글(과목,i){ var k=과목+"|"+i+"|q"; if(진도[k]) delete 진도[k]; else 진도[k]=1;
   try{ localStorage.setItem(PKEY,JSON.stringify(진도)); }catch(e){} }
+/* 수강 카드 펼침/접힘 — 한번 누르면 그 상태가 과목별로 저장됩니다. */
+var 펼침상태={}, EKEY="hakjeom-펼침-v1";
+try{ 펼침상태=JSON.parse(localStorage.getItem(EKEY)||"{}"); }catch(e){ 펼침상태={}; }
+function 펼침상태저장(){ try{ localStorage.setItem(EKEY,JSON.stringify(펼침상태)); }catch(e){} }
 /* 그 주에 퀴즈가 있는지 — 강의계획서를 확인한 과목만 true 가 나옵니다. */
 function 퀴즈있나(과목,i){ var s=D.주차상세&&D.주차상세[과목]; return !!(s&&s[i-1]&&s[i-1].퀴즈); }
 function 현재주차(c){ var p=c.시작.split("-"), s=new Date(+p[0],+p[1]-1,+p[2]);
@@ -1001,8 +1005,12 @@ function 갱신(){
     }
     card.appendChild(body);
     var 펼침=function(open){ body.hidden=!open; chev.textContent=open?"▾":"▸"; card.classList.toggle("open",open); };
-    펼침(진행중);                               // 진행 중인 과목만 펼쳐 둠
-    head.addEventListener("click",function(){ tap(); 펼침(body.hidden); });
+    var 저장된값 = 펼침상태[c.과목];
+    펼침(저장된값===undefined ? 진행중 : 저장된값);   // 건드린 적 없으면 진행 중인 과목만 펼쳐 둠
+    head.addEventListener("click",function(){
+      tap(); var open=body.hidden; 펼침(open);
+      펼침상태[c.과목]=open; 펼침상태저장();
+    });
     진도갱신();
     v3.appendChild(card);
   });
