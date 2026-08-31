@@ -71,7 +71,7 @@ self.addEventListener("notificationclick", (e) => {
 
 // 앱 껍데기를 통째로 캐시해 오프라인에서도 열립니다.
 // 버전은 index.html 내용에서 뽑은 해시라, 내용이 바뀌면 캐시가 자동으로 갈립니다.
-const VERSION = "hakjeom-15a7b015c8";
+const VERSION = "hakjeom-778c4e857b";
 // hakjeom.ics 는 일부러 캐시하지 않습니다 — 캘린더가 구독으로 늘 최신을 받아가야 합니다.
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest",
                 "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
