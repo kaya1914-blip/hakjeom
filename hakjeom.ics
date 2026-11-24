@@ -330,11 +330,11 @@ DTSTART;TZID=Asia/Seoul:20270104T090000
 DTEND;TZID=Asia/Seoul:20270104T093000
 SUMMARY:[학점] 2027년 시험 일정 공고로 확정하기 (날짜 추
  정)
-DESCRIPTION:학점은행 2027 접수계획은 확인 완료(공고 제2026-
- 41호)\n남은 것: 큐넷 기사 시행계획 · 독학사 시행계획 
- · 네트워크관리사(ICQA\, 연 4회)\n발표되면 이 일정표의 
- 추정 날짜를 바로잡을 것\n\n※ 아직 공고 전이라 날짜는
-  추정입니다. 공고로 확인하고 이 일정을 고치세요.
+DESCRIPTION:학점은행·기사 일정은 확인 완료\n남은 것: 독
+ 학사 시행계획 · 네트워크관리사(ICQA\, 연 4회)\n발표되
+ 면 이 일정표의 추정 날짜를 바로잡을 것\n\n※ 아직 공
+ 고 전이라 날짜는 추정입니다. 공고로 확인하고 이 일정
+ 을 고치세요.
 BEGIN:VALARM
 ACTION:DISPLAY
 TRIGGER:PT0S
@@ -342,27 +342,31 @@ DESCRIPTION:2027년 시험 일정 공고로 확정하기
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
-UID:hakjeom-2027-01-11-9775988fdcf9@e-hakjeom.local
+UID:hakjeom-2027-01-18-6086e692b441@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
 SEQUENCE:232
 DTSTAMP:20261124T000000Z
-DTSTART;TZID=Asia/Seoul:20270111T090000
-DTEND;TZID=Asia/Seoul:20270111T093000
-SUMMARY:[학점] 정보처리기사 1회 필기 접수 (날짜 추정)
+DTSTART;TZID=Asia/Seoul:20270118T090000
+DTEND;TZID=Asia/Seoul:20270118T093000
+SUMMARY:[학점] 정보처리기사 1회 필기 접수 (1/18~1/21)
 DESCRIPTION:★ 8월 학위의 핵심 — 1회에 붙어야 7/15 학위신
- 청에 맞음\n접수는 회차당 월~목 4일뿐 (2026년은 1/12~1/15)\
- n2027년부터 필기 출제기준 변경 — 새 기준으로 공부\nq-n
- et.or.kr\n\n※ 아직 공고 전이라 날짜는 추정입니다. 공고
- 로 확인하고 이 일정을 고치세요.
+ 청에 맞음\n접수는 월~목 4일뿐 · 2027년부터 필기 출제기
+ 준 변경(80문항·2시간)\n고용노동부 공고 제2026-518호 · q-
+ net.or.kr
 BEGIN:VALARM
 ACTION:DISPLAY
 TRIGGER:PT0S
-DESCRIPTION:정보처리기사 1회 필기 접수
+DESCRIPTION:정보처리기사 1회 필기 접수 (1/18~1/21)
 END:VALARM
 BEGIN:VALARM
 ACTION:DISPLAY
 TRIGGER:-P3D
-DESCRIPTION:3일 뒤 — 정보처리기사 1회 필기 접수
+DESCRIPTION:3일 뒤 — 정보처리기사 1회 필기 접수 (1/18~1/21)
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:1일 뒤 — 정보처리기사 1회 필기 접수 (1/18~1/21)
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
@@ -392,46 +396,82 @@ DESCRIPTION:1일 뒤 — 23학점 인정신청 마감
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
-UID:hakjeom-2027-02-01-69aad0c48c03@e-hakjeom.local
+UID:hakjeom-2027-02-01-2c676ce915fa@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
 SEQUENCE:232
 DTSTAMP:20261124T000000Z
 DTSTART;TZID=Asia/Seoul:20270201T090000
 DTEND;TZID=Asia/Seoul:20270201T093000
-SUMMARY:[학점] 2027(상) K-MOOC 19학점 신청 · 정처기 필기 시
- 험 기간 (날짜 추정)
-DESCRIPTION:K-MOOC: 교양 10 + 자유 9. ★ 6월 안에 성적이 나오
- 는 강좌만\n판정은 python 판정.py 로 — 이름만 보고 짐작
- 하면 틀립니다\n정보처리기사 1회 필기 시험은 2026년 기
- 준 1/30~3/3 사이\n\n※ 아직 공고 전이라 날짜는 추정입니
- 다. 공고로 확인하고 이 일정을 고치세요.
+SUMMARY:[학점] 2027(상) K-MOOC 19학점 신청 (날짜 추정)
+DESCRIPTION:교양 10 + 자유 9. ★ 6월 안에 성적이 나오는 강
+ 좌만\n판정은 python 판정.py 로 — 이름만 보고 짐작하면 
+ 틀립니다\n\n※ 아직 공고 전이라 날짜는 추정입니다. 공
+ 고로 확인하고 이 일정을 고치세요.
 BEGIN:VALARM
 ACTION:DISPLAY
 TRIGGER:PT0S
-DESCRIPTION:2027(상) K-MOOC 19학점 신청 · 정처기 필기 시험 기
- 간
+DESCRIPTION:2027(상) K-MOOC 19학점 신청
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
-UID:hakjeom-2027-03-22-979a2ac28050@e-hakjeom.local
+UID:hakjeom-2027-02-12-8ead91a8da4a@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:232
+DTSTAMP:20261124T000000Z
+DTSTART;TZID=Asia/Seoul:20270212T090000
+DTEND;TZID=Asia/Seoul:20270212T093000
+SUMMARY:[학점] 정보처리기사 1회 필기 시험 (2/12~3/2)
+DESCRIPTION:CBT · 기간 안에 날짜 골라 응시\n응시자격 서류 
+ 제출 2/12~3/19 (실기 접수 전까지)
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:정보처리기사 1회 필기 시험 (2/12~3/2)
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P3D
+DESCRIPTION:3일 뒤 — 정보처리기사 1회 필기 시험 (2/12~3/2)
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2027-03-10-0fdf54fc50c1@e-hakjeom.local
+ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
+SEQUENCE:232
+DTSTAMP:20261124T000000Z
+DTSTART;TZID=Asia/Seoul:20270310T090000
+DTEND;TZID=Asia/Seoul:20270310T093000
+SUMMARY:[학점] 정보처리기사 1회 필기 합격 발표
+DESCRIPTION:09:00 발표 · 응시자격 서류를 3/19까지 꼭 제출
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:정보처리기사 1회 필기 합격 발표
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:hakjeom-2027-03-22-2fab801cd90e@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
 SEQUENCE:232
 DTSTAMP:20261124T000000Z
 DTSTART;TZID=Asia/Seoul:20270322T090000
 DTEND;TZID=Asia/Seoul:20270322T093000
-SUMMARY:[학점] 정보처리기사 1회 실기 접수 (날짜 추정)
-DESCRIPTION:필기 합격 뒤 응시자격 서류 제출 → 실기 접수 
- (2026년은 3/23~3/26)\n\n※ 아직 공고 전이라 날짜는 추정입
- 니다. 공고로 확인하고 이 일정을 고치세요.
+SUMMARY:[학점] 정보처리기사 1회 실기 접수 (3/22~3/25)
+DESCRIPTION:월~목 4일뿐
 BEGIN:VALARM
 ACTION:DISPLAY
 TRIGGER:PT0S
-DESCRIPTION:정보처리기사 1회 실기 접수
+DESCRIPTION:정보처리기사 1회 실기 접수 (3/22~3/25)
 END:VALARM
 BEGIN:VALARM
 ACTION:DISPLAY
 TRIGGER:-P3D
-DESCRIPTION:3일 뒤 — 정보처리기사 1회 실기 접수
+DESCRIPTION:3일 뒤 — 정보처리기사 1회 실기 접수 (3/22~3/25)
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:1일 뒤 — 정보처리기사 1회 실기 접수 (3/22~3/25)
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
@@ -458,26 +498,29 @@ DESCRIPTION:1일 뒤 — 2분기 인정신청 (4/1~4/30) · 독학사 공
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
-UID:hakjeom-2027-04-17-c9d0bab6d3de@e-hakjeom.local
+UID:hakjeom-2027-04-18-8f18e61b892f@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
 SEQUENCE:232
 DTSTAMP:20261124T000000Z
-DTSTART;TZID=Asia/Seoul:20270417T090000
-DTEND;TZID=Asia/Seoul:20270417T093000
-SUMMARY:[학점] 정보처리기사 1회 실기 시험 기간 (날짜 추
- 정)
-DESCRIPTION:2026년 기준 4/18~5/6 사이\n\n※ 아직 공고 전이라 
- 날짜는 추정입니다. 공고로 확인하고 이 일정을 고치세
- 요.
+DTSTART;TZID=Asia/Seoul:20270418T090000
+DTEND;TZID=Asia/Seoul:20270418T093000
+SUMMARY:[학점] 정보처리기사 1회 실기 (필답형)
+DESCRIPTION:기사 1회 실기 4/17~5/4 · 필답형은 첫 일요일 전
+ 국 동시 시행
 BEGIN:VALARM
 ACTION:DISPLAY
 TRIGGER:PT0S
-DESCRIPTION:정보처리기사 1회 실기 시험 기간
+DESCRIPTION:정보처리기사 1회 실기 (필답형)
 END:VALARM
 BEGIN:VALARM
 ACTION:DISPLAY
 TRIGGER:-P3D
-DESCRIPTION:3일 뒤 — 정보처리기사 1회 실기 시험 기간
+DESCRIPTION:3일 뒤 — 정보처리기사 1회 실기 (필답형)
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:1일 뒤 — 정보처리기사 1회 실기 (필답형)
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
@@ -535,17 +578,15 @@ DESCRIPTION:1일 뒤 — 독학사 2과정 시험
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
-UID:hakjeom-2027-06-04-89399e0ae251@e-hakjeom.local
+UID:hakjeom-2027-06-11-81dae7bb00c0@e-hakjeom.local
 ORGANIZER;CN=학점은행제 로드맵:mailto:hakjeom@e-hakjeom.local
 SEQUENCE:232
 DTSTAMP:20261124T000000Z
-DTSTART;TZID=Asia/Seoul:20270604T090000
-DTEND;TZID=Asia/Seoul:20270604T093000
-SUMMARY:[학점] 정보처리기사 1회 최종 합격 발표 (날짜 추
- 정)
-DESCRIPTION:불합격이면 8월 학위는 어렵고 플랜B(2028년 2월)
- 로 전환\n\n※ 아직 공고 전이라 날짜는 추정입니다. 공
- 고로 확인하고 이 일정을 고치세요.
+DTSTART;TZID=Asia/Seoul:20270611T090000
+DTEND;TZID=Asia/Seoul:20270611T093000
+SUMMARY:[학점] 정보처리기사 1회 최종 합격 발표
+DESCRIPTION:필답형(중앙채점) 2차 발표 6/11 09:00\n합격하면 
+ 바로 학점인정신청 · 불합격이면 플랜B(2028년 2월)
 BEGIN:VALARM
 ACTION:DISPLAY
 TRIGGER:PT0S
