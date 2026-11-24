@@ -824,6 +824,28 @@ function 거르기(){
   });
 }
 
+/* ── 내 기록 보내기 — 폰에서 체크한 상태·진도를 JSON 파일로 공유(클로드·카톡 등). ponytail: 가져오기는 아직 없음 ── */
+(function(){
+  var 칸=document.createElement("div"); 칸.className="subs"; 칸.style.marginTop="14px";
+  칸.innerHTML='<div class="st">내 기록 보내기</div>'+
+   '<p>지금까지 폰에서 체크한 상태와 진도를 파일 하나로 묶어 보냅니다. 공유 창에서 <b>Claude</b>나 카톡 나와의 채팅을 고르세요.</p>'+
+   '<button class="calbig" id="exportme" type="button">내 기록 보내기</button>';
+  v0.appendChild(칸);
+  document.getElementById("exportme").addEventListener("click", async function(){
+    tap();
+    var 묶음={판:D.판, 보낸때:new Date().toISOString(), 기록:{}};
+    for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i);
+      if(k.indexOf("hakjeom")===0){ try{ 묶음.기록[k]=JSON.parse(localStorage.getItem(k)); }catch(e){ 묶음.기록[k]=localStorage.getItem(k); } } }
+    var 글=JSON.stringify(묶음,null,1), 이름="학점기록_"+new Date().toISOString().slice(0,10)+".json";
+    try{
+      var f=new File([글],이름,{type:"application/json"});
+      if(navigator.canShare && navigator.canShare({files:[f]})){ await navigator.share({files:[f],title:"학점 기록"}); say("보냈습니다."); return; }
+    }catch(e){ if(e && e.name==="AbortError"){ say("취소했습니다."); return; } }
+    try{ await navigator.clipboard.writeText(글); say("기록을 복사했습니다. 클로드 채팅에 붙여넣으세요."); }
+    catch(e){ say("이 브라우저에서는 막혀 있습니다. 설치한 앱에서 눌러 주세요."); }
+  });
+})();
+
 /* ── 일정 ── */
 var v2=document.getElementById("v2");
 v2.innerHTML='<div class="subs"><div class="st">캘린더에 붙이는 가장 좋은 방법</div>'+
